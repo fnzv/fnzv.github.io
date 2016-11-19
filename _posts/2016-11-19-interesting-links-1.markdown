@@ -1,6 +1,6 @@
 ---
 published: true
-title: Interesting Links #1
+title: Interesting Stuff 0x1
 layout: post
 ---
 "How Gmail fought spam" <br>https://moderncrypto.org/mail-archive/messaging/2014/000780.html  <br>
