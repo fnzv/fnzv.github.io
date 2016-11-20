@@ -1,6 +1,6 @@
 ---
 published: true
-title: Interesting Stuff 0x1
+title: Interesting Stuff 0x01
 layout: post
 ---
 "<strong>How Gmail fought spam</strong>"<br>
