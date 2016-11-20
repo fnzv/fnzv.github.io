@@ -1,6 +1,6 @@
 ---
 published: true
-title: hello
+title: Hello
 layout: post
 ---
-world
+<strong>World</strong>
