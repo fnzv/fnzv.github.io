@@ -1,6 +1,0 @@
----
-published: false
-title: Hello
-layout: post
----
-<strong>World</strong>
