@@ -3,6 +3,6 @@ pygments: true
 markdown: kramdown
 url: http://fnzv.github.io
 highlighter: rouge
-title: Sami
+title: sami.pw
 paginate: 5
 google_analytics: UA-87752001-1
