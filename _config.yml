@@ -1,7 +1,7 @@
 excerpt_separator: ""
 pygments: true
 markdown: kramdown
-url: http://fnzv.github.io
+url: http://sami.pw
 highlighter: rouge
 title: sami.pw
 paginate: 5
