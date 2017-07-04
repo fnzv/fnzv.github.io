@@ -35,19 +35,19 @@ Address: {YOUR ETHEREUM ADDRESS}
 3) Generate the 'Genesis' block of your blockchain with:<br>
 #### geth init genesis.json<br><br>
 genesis.json format is:<br>
-{
-    "config": {
-        "chainId": 13,
-        "homesteadBlock": 0,
-        "eip155Block": 0,
-        "eip158Block": 0
-    },<br>
-    "difficulty": "200000000",
-    "gasLimit": "2100000",
-    "alloc": {
-        "{YOUR ETHEREUM ADDRESS GENERATED FROM ABOVE": { "balance": "100000000" }
-    }
-}
+{<br>
+    "config": {<br>
+        "chainId": 13,<br>
+        "homesteadBlock": 0,<br>
+        "eip155Block": 0,<br>
+        "eip158Block": 0<br>
+    },<br><br>
+    "difficulty": "200000000",<br>
+    "gasLimit": "2100000",<br>
+    "alloc": {<br>
+        "{YOUR ETHEREUM ADDRESS GENERATED FROM ABOVE": { "balance": "100000000" }<br>
+    }<br>
+}<br>
 
 NOTE:
 On "chainId" put your networkid <br>
