@@ -11,7 +11,8 @@ Requirements:<br>
 Difficulty level: CTRL+C/CTRL+V a.k.a DigitalOcean style<br>
 
 1) Install Ethereum (with repo):<br>
-```sudo apt-get install software-properties-common<br>
+```
+sudo apt-get install software-properties-common<br>
 sudo add-apt-repository -y ppa:ethereum/ethereum<br>
 sudo apt-get update<br>
 sudo apt-get install ethereum
