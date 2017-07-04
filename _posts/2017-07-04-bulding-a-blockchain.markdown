@@ -24,13 +24,13 @@ Difficulty level: CTRL+C/CTRL+V a.k.a DigitalOcean style<br>
 
 <br>
 Output:<br>
-root@eth-01:/home/ubuntu# geth account new
-WARN [07-04|21:27:58] No etherbase set and no accounts found as default
-Your new account is locked with a password. Please give a password. Do not forget this password.
-Passphrase:
-Repeat passphrase:
-Address: {YOUR ETHEREUM ADDRESS}
-
+root@eth-01:/home/ubuntu# geth account new<br>
+WARN [07-04|21:27:58] No etherbase set and no accounts found as default<br>
+Your new account is locked with a password. Please give a password. Do not forget this password.<br>
+Passphrase:<br>
+Repeat passphrase:<br>
+Address: {YOUR ETHEREUM ADDRESS}<br>
+<br>
 
 3) Generate the 'Genesis' block of your blockchain with:<br>
 #### geth init genesis.json<br><br>
