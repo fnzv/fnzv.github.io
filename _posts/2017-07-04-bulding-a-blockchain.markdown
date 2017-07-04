@@ -12,15 +12,15 @@ Difficulty level: CTRL+C/CTRL+V a.k.a DigitalOcean style<br>
 
 1) Install Ethereum (with repo):<br>
 
-sudo apt-get install software-properties-common<br>
-sudo add-apt-repository -y ppa:ethereum/ethereum<br>
-sudo apt-get update<br>
-sudo apt-get install ethereum
+#### sudo apt-get install software-properties-common<br>
+#### sudo add-apt-repository -y ppa:ethereum/ethereum<br>
+#### sudo apt-get update<br>
+#### sudo apt-get install ethereum
 
 <br>
 2) Create an Ethereum Account/Address:<br>
 
-geth account new
+#### geth account new
 
 <br>
 Output:<br>
@@ -33,7 +33,7 @@ Address: {YOUR ETHEREUM ADDRESS}
 
 
 3) Generate the 'Genesis' block of your blockchain with:<br>
-geth init genesis.json<br><br>
+#### geth init genesis.json<br><br>
 genesis.json format is:<br>
 {
     "config": {
@@ -54,7 +54,7 @@ On "chainId" put your networkid <br>
 
 3) Run the first node with (networkid must be different from (1=Frontier, 2=Morden (disused), 3=Ropsten and 4) :
 
-geth --datadir="/tmp/eth01" -verbosity 6 --port 30301 --networkid 13 --nodiscover console
+#### geth --datadir="/tmp/eth01" -verbosity 6 --port 30301 --networkid 13 --nodiscover console
 
 
 You can run this command under screen/NOHUP or any other way to keep it on background (pls not systemd).<br>
@@ -67,7 +67,7 @@ All the nodes must start the blockchain from the same genesis.json file (The fir
 To dinamically add other nodes you must follow the same steps from above (install eth, genesis from same block & run node on same net id) then add the node as an Admin peer with: <br>
 
 From the geth console run this to get your node public key: <br>
-admin.nodeInfo.enode
+#### admin.nodeInfo.enode
 
 Output:<br>
 
@@ -76,17 +76,17 @@ Output:<br>
 This is your public-key@ip:30303 and its the identifier for the node, to make the nodes see eachother you need to add them as peers with:<br>
 
 
-admin.addPeer("enode://public-key@ip:30303")
+#### admin.addPeer("enode://public-key@ip:30303")
 
 
 <br>
 How to check if peers are UP: <br>
 
-net.peerCount
+#### net.peerCount
 
 or
 
-admin.peers
+#### admin.peers
 <br>
 
 How to add statically Admin Peers:
