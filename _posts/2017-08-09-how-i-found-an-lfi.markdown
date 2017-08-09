@@ -59,7 +59,7 @@ decode:		root<br>
 <br>
 #Person who should get root's mail<br>
 #root:		marc<br>
-#root:	# fabian.adam@mpbcorp-address.it, # frank.life@mpbcorp-address.it <br>
+#root:	 fabian.adam@mpbcorp-address.it,frank.life@mpbcorp-address.it <br>
 <br><br><br>
 Well if they should get root's mail then i'll contact them about this.<br>
 The day after i got this "Macro" reply from "frank" :<br>
@@ -89,10 +89,10 @@ Yep, i know that MPBCORP is big and probably no one cares because i'm the only o
 <br>
 <br>
 What could have happened (From less to more skilled):<br>
+-  Script kiddie tries to hack using any tool found on the net (% of compromise very low but ain't 100% sure on your security after i saw selinux on permissive)<br>
 - "Simple" Hacker found out LFI on the site --> Sells directly this on 0day/exploit forums/deepweb makes some cash $$ even if doesn't show how to exploit the system<br>
 - "Expert" Hacker silently gather all the system data for months and then plan for major data-breach & compromise of their infrastructure...Sysadmin: Come on.. LFI ain't so dangerous --> Just Google LFI to RCE  678.000 results in 0,80 seconds and after<br>
 you gathered all the system information i think it's just a matter of time (wait for exploits to come out, discover your self or buy a 0day) to compromise the host. <br>
--  Script kiddie tries to hack using any tool found on the net (% of compromise very low but ain't 100% sure on your security after i saw selinux on permissive)<br>
 - "Pro" Hacker plans for his malicious plan of getting on his hands their SSL private key .pem file after he got RCE (Since he is "Pro" that what he does daily..that step will take him no time) <br>
    a) "Refactor" file permissions on .pem files<br>
    b) Download the .pem <br>
