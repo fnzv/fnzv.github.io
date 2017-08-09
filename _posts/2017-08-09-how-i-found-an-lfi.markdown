@@ -96,7 +96,7 @@ you gathered all the system information i think it's just a matter of time (wait
 - "Pro" Hacker plans for his malicious plan of getting on his hands their SSL private key .pem file after he got RCE (Since he is "Pro" that what he does daily..that step will take him no time) <br>
    a) "Refactor" file permissions on .pem files<br>
    b) Download the .pem <br>
-   c) MITM bank customers and get all their credentials <br>
+   c) MITM bank customers and get all their credentials on (W)LANS (Why not WAN.. if you have Ratted victim PC or compromised a router)<br>
    d) Massive blackhat profits<br>
 <br>
 <br>
