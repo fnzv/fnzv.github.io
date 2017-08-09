@@ -26,9 +26,9 @@ operator:x:11:0:operator:/root:/sbin/nologin<br>
 .<br>
 <br>
 At the beginning my reaction was like.. Well that must be a honeypot because they should have a real-badass Sysadmin(s) running HIDS/DPI/Sensors/Alerts & Monitoring every breath of any system in the radius<br>
-of an entire DC.<br>
+of an entire DC.<br><br>
 But then i said well what if they aren't so badass and missed that, so i type:  youweb.bankmpb.it/../../../../etc/hosts and then .. :
-<br>
+<br><br><br>
 ##########################<br>
 #####ATTENZIONE !!<br>
 ##<br>
@@ -51,16 +51,16 @@ nameserver *.*.140.25<br>
 <br>
 *.*.203.12	*.*.group	*<br>
 <br>
-<br>
-Wow... we are dealing with a DevOpser (a Master of Puppet)...and that is an LFI (*hacker-voice* "we are in", and i didn't even need my great tool inspect element to hack their JS/CSS).<br>
-So i kept checking if i can find the contact of their Sysadmin to report him this vulnerability that could cost them $$ if exploited well.... *checking postfix conf for contact* :<br>
+<br><br><br>
+Wow... we are dealing with a DevOpser (Master of Puppets)...and that is an LFI (*hacker-voice* "we are in", and i didn't even need my great tool inspect element to hack their JS/CSS).<br>
+So i kept checking if i can find the contact of their Sysadmin to report him this vulnerability that could cost them $$ if exploited well.... *checking postfix conf for contact* :<br><br>
 #trap decode to catch security attacks<br>
 decode:		root<br>
 <br>
 #Person who should get root's mail<br>
 #root:		marc<br>
-#root:		fabian.adam@mpbcorp-address.it,frank.life@mpbcorp-address.it <br>
-<br>
+#root:	# fabian.adam@mpbcorp-address.it, # frank.life@mpbcorp-address.it <br>
+<br><br><br>
 Well if they should get root's mail then i'll contact them about this.<br>
 The day after i got this "Macro" reply from "frank" :<br>
 Good afternoon Sami,<br>
