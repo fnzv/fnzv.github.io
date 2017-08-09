@@ -3,7 +3,7 @@ published: true
 title: How i found an LFI vulnerability on a major banking site
 layout: post
 ---
-![Alt Text](https://cdn-images-1.medium.com/max/1600/1*uRPk2m9Rs_8lSuEleEpgLw.gif)
+![](https://cdn-images-1.medium.com/max/1600/1*uRPk2m9Rs_8lSuEleEpgLw.gif)
 
 Well yes, the title is a bit clickbait but that's what exactly happened some weeks ago when i was bored on an italian banking website, let's call it MPBbanking.<br><br>
 As always with "Great updates comes great responsability" for the Sysadmins that maintain such systems and that day since was their migration day from an old platform to a new one (from mpbbanking to youweb.bankmpb) i decided to explore what new features this portal has to offer... Just a few clicks and everything seems responsive and too cool to be good so i tried out the good'old LFI to be sure that everything was safe and configured correctly...  <br>
