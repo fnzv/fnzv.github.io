@@ -5,25 +5,25 @@ layout: post
 ---
 
 ![](ddos-warz.gif)
-
-Recently i was researching a lot on the various denial of service attacks and how to mitigate them from Layer 1 to 7 and as always the most convinient way to stop any attacks is keeping the bad requests/traffic away from your services starting from the first layers of the ISO/OSI model.
-Realistically the only ways to prevent DDoS attacks are:<br>
+<br>
+Recently i was researching a lot on the various denial of service attacks and how to mitigate them from Layer 1 to 7 and as always the most convinient way to stop any attacks is keeping the bad requests/traffic away from your services starting from the first layers of the ISO/OSI model.<br>
+#### Realistically the only ways to prevent DDoS attacks are:<br>
 a) Layer 3-4 mitigation with BGP/Cloud Scrubbing (Sending all your network traffic using BGP or 'sophisticated' VPNs to third-party POP's to delegate attack mitigation).<br>
    Pros: This is the only and smart way to properly mitigating attacks, your services won't be hit by attacks/malicious traffic.<br>
-   Cons: Paying an External Provider & bandwidth costs, All your traffic is re-routed so latency, packetloss and any other network issue that could happen to the External Provider affects you directly....And yes there could be false positives and customers may be locked out of their services.<br>
+   Cons: Paying an External Provider & bandwidth costs, All your traffic is re-routed so latency, packetloss and any other network issue that could happen to the External Provider affects you directly....And yes there could be false positives and customers may be locked out of their services.<br><br>
    <br>
 b) DNS Obfuscation/CDN Mitigation/Proxying only legit requests, a well-known example is CloudFlare  (Kinda like Security through Obfuscation.. and it works only if you have certain services and know your stuff.)<br>
    Pros: If you only have HTTP(S) services exposed this is a great option and it's cheap or free.. (You can also setup your own private proxying with Nginx on some VPS/Cloud provider with DDoS protection). <br>
    Cons: Doesn't work well if you have other exposed services like Email servers,FTP or any dedicated exposed network assigned to you (Example.. if you are a Carrier you can't just hide your site using DNS since they will hit you announced AS networks... )
-<br>
+<br><br><br>
 c) Layer 6-7 mitigation using server/service side counter-measures (Enabling Nginx rate limiting, Cache filtering, Apache mod_security & mod_evasive bans ..)<br>
    Pros: Easily to configure and some low-end attacks can be mitigated (Example: Website scans, Automated Bots/Aggressive crawlers..)<br>
    Cons: A real attack will saturate your Uplink and bring you down all your services<br>
-   <br>
+   <br><br><br>
 d) DIY DDoS protection using Linux boxes and the good old packet filter.<br>
    Pros: It's free, it just works, You need only to create your own "patterns" and attack/network blacklists.<br>
    Cons: You need to have at least 100G Uplinks and expesive dedicated servers to process all fast incoming/outgoing traffic, You have to manage all the network issues your self and if you saturate your link <br>
-         with the upstream BGP provider they may drop your traffic and/or blackhole you anyways as no one wants unwanted bandwidth costs & saturated links by malicious traffic or bogus packets.<br>
+         with the upstream BGP provider they may drop your traffic and/or blackhole you anyways as no one wants unwanted bandwidth costs & saturated links by malicious traffic or bogus packets.<br><br><br>
 	
 Before do you even think of option d) watch this:<br>
 ![](https://github.com/fnzv/fnzv.github.io/blob/beedd3afa60078ac41b7b574738a22f690bec90a/ddos-fish.gif)
