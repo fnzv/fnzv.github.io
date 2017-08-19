@@ -25,17 +25,17 @@ d) **DIY DDoS protection** using Linux boxes and the good old packet filter.<br>
   + Cons: You need to have at least 100G Uplinks and expesive dedicated servers to process all fast incoming/outgoing traffic, You have to manage all the network issues your self and if you saturate your link <br>
          with the upstream BGP provider they may drop your traffic and/or blackhole you anyways as no one wants unwanted bandwidth costs & saturated links by malicious traffic or bogus packets.<br><br><br>
 	
-Before do you even think of option d) watch this:<br>
+Before do you even think of option d) watch this:<br><br>
 ![](https://github.com/fnzv/fnzv.github.io/blob/beedd3afa60078ac41b7b574738a22f690bec90a/ddos-fish.gif?raw=true)
+<br><br>
 
-
-Cool, but how i detect attacks?  Well if you have $$ and you only believe enterprise stuff --> grab that 500+ grand network box and put it in front of your DC... whereas if you are an opensource guy you can go for
-FastNetMon (By Pavel Odintsov) and setup your own Anti-DDoS detection/mitigation solution.<br>
-<br>
-What is FastNetMon?<br>
+Cool, but how i detect attacks?  Well if you have $$ and you only believe enterprise stuff <br><br>
+--> grab that 500+ grand network box and put it in front of your DC... whereas if you are an opensource guy you can go for FastNetMon (By Pavel Odintsov) and setup your own Anti-DDoS detection/mitigation solution.<br>
+<br><br>
+What is FastNetMon?<br><br>
 **FastNetMon** is DDoS analyzer that will allow you to detect nearly realtime attacks or suspicious traffic (Example: VPS X is compromised and starts doing SYN Flood --> detected and alerted by FNM), FNM isn't just a <br>
 detection tool but also helps to mitigate attacks after the ban rule is triggered by running a bash script (So there are a lot of cool stuff to do.. Slack webhooks..Keep a track of Influx metircs..Email Alerts...Send an emergency call/SMS)<br>
-<br>
+<br><br>
 Scenario 1:<br>
 VPS provider on Hypervisor X protects customers with FNM and when an attacks is detected on NetFlow/sFlow/IPFIX traffic the bash script automatically adds a blackhole rule on edge network device/hypervisor host to avoid degrading network performance for 
 other customers<br>
@@ -50,18 +50,18 @@ And so on<br>
 <br>
 
 The FNM setup is quite easy to get up and running, the tricky part is setting up Grafana,Influxdb metrics but that's not a problem if you are interested only in detection/mitigation.<br>
-If you are into dashboarding you could also set up an ELK (this is the icing on the cake) to gather NetFlow data and create great visualization with Kibana (Total PPS in, Top "Talkers" on outgoing/incoming traffic, Traffic Categories, Sort by TCP/UDP..). <br>
+If you are into dashboarding you could also set up an ELK (this is the icing on the cake) to gather NetFlow data and create great visualization with Kibana (Total PPS in, Top "Talkers" on outgoing/incoming traffic, Traffic Categories, Sort by TCP/UDP..). <br><br>
 
 
 
 The only requirements are:<br>
 - Small Server/Virtual Machine that will recieve all the flow traffic from routers/switches via a [capture backend](https://github.com/pavel-odintsov/fastnetmon/blob/master/docs/CAPTURE_BACKENDS.md)<br>
 - For automated BGP integration you need to allow the Server to talk directly to the routers/switches<br>
-
+<br>
 
 Links and Resources:<br>
 - [Github documentation](https://github.com/pavel-odintsov/fastnetmon/tree/master/docs)<br>
 - [FastNetMon site](https://fastnetmon.com/) (Thank you Pavel for this project) <br>
-- [Managing Flows](http://pmacct.net/) (Great tool from Paolo Lucente) if you want to collect properly flows you can use nfacct <br>
+- [Managing Flows](http://pmacct.net/) (Great tool from Paolo Lucente) if you want to collect properly flows you can use nfacct <br><br>
 
 For any question & discussion don't esitate contact me as these topics are really interesting <br><br>
