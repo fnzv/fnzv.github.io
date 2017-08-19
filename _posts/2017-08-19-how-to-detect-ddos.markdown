@@ -61,4 +61,4 @@ Links and Resources:<br>
 - [FastNetMon site](https://fastnetmon.com/) (Thank you Pavel for this project) <br>
 - [Managing Flows](http://pmacct.net/) (Great tool from Paolo Lucente) if you want to collect properly flows you can use nfacct <br><br>
 
-For any question & discussion don't esitate contact me as these topics are really interesting <br><br>
+For any question & discussion don't esitate contact me <br><br>
