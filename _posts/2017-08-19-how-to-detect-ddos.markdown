@@ -4,8 +4,8 @@ title: How to detect & mitigate (D)DoS Attacks using FastNetMon
 layout: post
 ---
 
-![](ddos-warz.gif)
-<br>
+![](https://raw.githubusercontent.com/fnzv/fnzv.github.io/5653b21f4114429a5bddf86aaed7891fb3a1e542/imgs/ddos-warz.gif)
+<br><br><br>
 Recently i was researching a lot on the various denial of service attacks and how to mitigate them from Layer 1 to 7 and as always the most convinient way to stop any attacks is keeping the bad requests/traffic away from your services starting from the first layers of the ISO/OSI model.<br>
 #### Realistically the only ways to prevent DDoS attacks are:<br>
 a) Layer 3-4 mitigation with **BGP/Cloud** Scrubbing (Sending all your network traffic using BGP or 'sophisticated' VPNs to third-party POP's to delegate attack mitigation).<br>
@@ -30,9 +30,9 @@ Before do you even think of option d) watch this:<br><br>
 Cool, but how i detect attacks?  Well if you have $$ and you only believe enterprise stuff <br><br>
 --> grab that 500+ grand network box and put it in front of your DC... whereas if you are an opensource guy you can go for FastNetMon (By Pavel Odintsov) and setup your own Anti-DDoS detection/mitigation solution.<br>
 <br><br>
-What is FastNetMon?<br><br>
-**FastNetMon** is DDoS analyzer that will allow you to detect nearly realtime attacks or suspicious traffic (Example: VPS X is compromised and starts doing SYN Flood --> detected and alerted by FNM), FNM isn't just a <br>
-detection tool but also helps to mitigate attacks after the ban rule is triggered by running a bash script (So there are a lot of cool stuff to do.. Slack webhooks..Keep a track of Influx metircs..Email Alerts...Send an emergency call/SMS)<br>
+#### What is FastNetMon?<br><br>
+FastNetMon is **DDoS analyzer** that will let you to detect nearly realtime attacks or suspicious traffic (Example: VPS X is compromised and starts doing SYN Flood vs outbound nets --> detected and alerted by FNM), FNM isn't just a <br>
+detection tool but also helps to mitigate attacks after the ban rule is triggered by running a bash script (there are also a lot of 'extra' stuff to do.. Slack webhooks..Keep a track of Influx metircs..Email Alerts...Send an emergency call/SMS)<br>
 <br><br>
 Scenario 1:<br>
 VPS provider on Hypervisor X protects customers with FNM and when an attacks is detected on NetFlow/sFlow/IPFIX traffic the bash script automatically adds a blackhole rule on edge network device/hypervisor host to avoid degrading network performance for 
