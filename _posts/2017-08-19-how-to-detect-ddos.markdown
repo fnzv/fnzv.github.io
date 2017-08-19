@@ -20,8 +20,7 @@ c) **Layer 6-7 mitigation** using server/service side counter-measures (Enabling
   + Cons: A real attack will saturate your Uplink and bring you down all your services<br><br><br>
 d) **DIY DDoS protection** using Linux boxes and the good old packet filter.<br>
   + Pros: It's free, it just works, You need only to create your own "patterns" and attack/network blacklists.<br>
-  + Cons: You need to have at least 100G Uplinks and expesive dedicated servers to process all fast incoming/outgoing traffic, You have to manage all the network issues your self and if you saturate your link <br>
-         with the upstream BGP provider they may drop your traffic and/or blackhole you anyways as no one wants unwanted bandwidth costs & saturated links by malicious traffic or bogus packets.<br><br><br>
+  + Cons: You need to have at least 100G Uplinks and expesive dedicated servers to process all fast incoming/outgoing traffic, You have to manage all the network issues your self and if you saturate your link with the upstream BGP provider they may drop your traffic and/or blackhole you anyways as no one wants unwanted bandwidth costs & saturated links by malicious traffic or bogus packets.<br><br><br>
 	
 Before do you even think of option d) watch this:<br><br>
 ![](https://github.com/fnzv/fnzv.github.io/blob/beedd3afa60078ac41b7b574738a22f690bec90a/ddos-fish.gif?raw=true)
