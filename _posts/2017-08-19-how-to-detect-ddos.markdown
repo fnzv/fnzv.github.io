@@ -8,15 +8,15 @@ layout: post
 <br>
 Recently i was researching a lot on the various denial of service attacks and how to mitigate them from Layer 1 to 7 and as always the most convinient way to stop any attacks is keeping the bad requests/traffic away from your services starting from the first layers of the ISO/OSI model.<br>
 #### Realistically the only ways to prevent DDoS attacks are:<br>
-a) Layer 3-4 mitigation with BGP/Cloud Scrubbing (Sending all your network traffic using BGP or 'sophisticated' VPNs to third-party POP's to delegate attack mitigation).<br>
+a) Layer 3-4 mitigation with **BGP/Cloud** Scrubbing (Sending all your network traffic using BGP or 'sophisticated' VPNs to third-party POP's to delegate attack mitigation).<br>
    Pros: This is the only and smart way to properly mitigating attacks, your services won't be hit by attacks/malicious traffic.<br>
    Cons: Paying an External Provider & bandwidth costs, All your traffic is re-routed so latency, packetloss and any other network issue that could happen to the External Provider affects you directly....And yes there could be false positives and customers may be locked out of their services.<br><br>
    <br>
-b) DNS Obfuscation/CDN Mitigation/Proxying only legit requests, a well-known example is CloudFlare  (Kinda like Security through Obfuscation.. and it works only if you have certain services and know your stuff.)<br>
+b) DNS Obfuscation/**CDN Mitigation**/Proxying only legit requests, a well-known example is CloudFlare  (Kinda like Security through Obfuscation.. and it works only if you have certain services and know your stuff.)<br>
    Pros: If you only have HTTP(S) services exposed this is a great option and it's cheap or free.. (You can also setup your own private proxying with Nginx on some VPS/Cloud provider with DDoS protection). <br>
    Cons: Doesn't work well if you have other exposed services like Email servers,FTP or any dedicated exposed network assigned to you (Example.. if you are a Carrier you can't just hide your site using DNS since they will hit you announced AS networks... )
 <br><br><br>
-c) Layer 6-7 mitigation using server/service side counter-measures (Enabling Nginx rate limiting, Cache filtering, Apache mod_security & mod_evasive bans ..)<br>
+c) **Layer 6-7 mitigation** using server/service side counter-measures (Enabling Nginx rate limiting, Cache filtering, Apache mod_security & mod_evasive bans ..)<br>
    Pros: Easily to configure and some low-end attacks can be mitigated (Example: Website scans, Automated Bots/Aggressive crawlers..)<br>
    Cons: A real attack will saturate your Uplink and bring you down all your services<br>
    <br><br><br>
@@ -26,14 +26,14 @@ d) DIY DDoS protection using Linux boxes and the good old packet filter.<br>
          with the upstream BGP provider they may drop your traffic and/or blackhole you anyways as no one wants unwanted bandwidth costs & saturated links by malicious traffic or bogus packets.<br><br><br>
 	
 Before do you even think of option d) watch this:<br>
-![](https://github.com/fnzv/fnzv.github.io/blob/beedd3afa60078ac41b7b574738a22f690bec90a/ddos-fish.gif)
+![](https://github.com/fnzv/fnzv.github.io/blob/beedd3afa60078ac41b7b574738a22f690bec90a/ddos-fish.gif?raw=true)
 
 
 Cool, but how i detect attacks?  Well if you have $$ and you only believe enterprise stuff --> grab that 500+ grand network box and put it in front of your DC... whereas if you are an opensource guy you can go for
 FastNetMon (By Pavel Odintsov) and setup your own Anti-DDoS detection/mitigation solution.<br>
 <br>
 What is FastNetMon?<br>
-FastNetMon is DDoS analyzer that will allow you to detect nearly realtime attacks or suspicious traffic (Example: VPS X is compromised and starts doing SYN Flood --> detected and alerted by FNM), FNM isn't just a <br>
+**FastNetMon** is DDoS analyzer that will allow you to detect nearly realtime attacks or suspicious traffic (Example: VPS X is compromised and starts doing SYN Flood --> detected and alerted by FNM), FNM isn't just a <br>
 detection tool but also helps to mitigate attacks after the ban rule is triggered by running a bash script (So there are a lot of cool stuff to do.. Slack webhooks..Keep a track of Influx metircs..Email Alerts...Send an emergency call/SMS)<br>
 <br>
 Scenario 1:<br>
