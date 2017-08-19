@@ -31,7 +31,7 @@ Cool, but how i detect attacks?  Well if you have $$ and you only believe enterp
 <br><br>
 #### What is FastNetMon?<br><br>
 FastNetMon is **DDoS analyzer** that will let you to detect nearly realtime attacks or suspicious traffic (Example: VPS X is compromised and starts doing SYN Flood vs outbound nets --> detected and alerted by FNM), FNM isn't just a <br>
-detection tool but also helps to mitigate attacks after the ban rule is triggered by running a bash script (there are also a lot of 'extra' stuff to do.. Slack webhooks..Keep a track of Influx metircs..Email Alerts...Send an emergency call/SMS)<br>
+detection tool but also helps to mitigate attacks, after the ban rule is triggered a bash script is being executed (there are also a lot of 'extra' stuff to do.. Slack webhooks..Keep a track of Influx metircs..Email Alerts...Send an emergency call/SMS..BGP Announce...Shutoff the VPS)<br>
 <br><br>
 Scenario 1:<br>
 VPS provider on Hypervisor X protects customers with FNM and when an attacks is detected on NetFlow/sFlow/IPFIX traffic the bash script automatically adds a blackhole rule on edge network device/hypervisor host to avoid degrading network performance for 
