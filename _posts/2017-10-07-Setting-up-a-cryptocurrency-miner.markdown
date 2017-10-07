@@ -10,7 +10,7 @@ Since a few months i started getting more and more interested in crypto and now 
 At the very beginning of Mining many were attracted by Bitcoin since the difficulty was so low that everyone with some spare GPUs could start and be an active node of the Bitcoin network and earn some satoshi, Nowadays this is still a thing but the <br>
 the miners have evolved and investors came into the game with huge datacenters full of ASICs dedicated to mining a single coin and boosting the difficulty to the very top causing low budget miners to shutoff their rigs since you cannot make any profits<br>
 with just a bunch of GPUs on the same coin.<br>
-What happened next? Different coins started profitable allowing more GPU owners to jump into the mining game using another cryptocurrency like Ethereum, Zcash, Ethereum Classic, Monero.. and many others, if you ever noticed GPU prices this summer <br>
+What happened next? Different coins started becoming profitable and allowing more GPU owners to jump into the mining game using another cryptocurrency like Ethereum, Zcash, Ethereum Classic, Monero.. and many others, if you ever noticed GPU prices this summer <br>
 you probably saw that the value of AMD/Nvidia GPUs was incredibly high and the European/American market started struggling finding those cards as "Mining Whales" started buying 300-400 cards per order making Hobbist/Gamers life harder.<br>
 
 Ok cool, now i see that Ethereum/Zcash/Monero/...Coin xyz... is still PoW(Proof of Work) and i can mine coins till end of 20xx how can i start mining? <br>
