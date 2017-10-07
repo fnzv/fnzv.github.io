@@ -51,7 +51,7 @@ Installing the drivers and Nvidia SMI<br><br>
 ```sudo apt-get install nvidia-smi```<br>
 ```sudo apt-get install nvidia-384```<br>
 <br><br>
-
+** To correctly run Nvidia Drivers you must install startx and configure the GPUs with "Fake" Screens as on Ubuntu 16.04 LTS Server there is no gui.. (Files that you should configure are /root/.xinitrc for OC settings and /etc/X11/xorg.conf for "Fake" screens attached to GPUs)<br> <br>
 Now you just have to choose your miner and mining pool to start mining (I assume you already have a Wallet for the coin you want to mine).<br>
 Examples:<br>
 <br>
