@@ -3,18 +3,22 @@ published: true
 title: Some (fun) stats from a running Telnet honeypot (YAFH)
 layout: post
 ---
-![](https://cryptoyeti.com/wp-content/uploads/2016/10/mining-zcash-326x245.png)
 
 Telnet sessions:
 ```netstat -peanut | grep 23 | grep ESTABLISHED | wc -l
-185```<br>
+185
+```
+<br>
 
 Total connection recieved last month:
 ```grep CONNECTION yafh-telnet.log  | wc -l
-644```
+644
+```<br>
 
-Most common wget/busybox attempt (Dont run it...i implemented accidental copy-pasta protection here '#'):
-```#/bin/busybox wget; /bin/busybox 81c46036wget; /bin/busybox echo -ne '\x0181c46036\x7f'; /bin/busybox printf '\00281c46036\177'; /bin/echo -ne '\x0381c46036\x7f'; /usr/bin/printf '\00481c46036\177'; ```
+Most common wget/busybox attempt (Dont run it...i implemented accidental copy-pasta protection here #):<br>
+```#/bin/busybox wget; /bin/busybox 81c46036wget; /bin/busybox echo -ne '\x0181c46036\x7f'; /bin/busybox printf '\00281c46036\177'; /bin/echo -ne '\x0381c46036\x7f'; /usr/bin/printf '\00481c46036\177'; 
+```
+<br>
 
 Top 15 password used (The honeypot was designed to allow any password access):
 ```
