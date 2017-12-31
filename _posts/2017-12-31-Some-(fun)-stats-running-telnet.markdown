@@ -20,7 +20,8 @@ grep CONNECTION yafh-telnet.log  | wc -l
 <br>
 
 Most common wget/busybox attempt (Dont run it...i implemented accidental copy-pasta protection here #):<br>
-```#/bin/busybox wget; /bin/busybox 81c46036wget; /bin/busybox echo -ne '\x0181c46036\x7f'; /bin/busybox printf '\00281c46036\177'; /bin/echo -ne '\x0381c46036\x7f'; /usr/bin/printf '\00481c46036\177'; 
+```
+# /bin/busybox wget; /bin/busybox 81c46036wget; /bin/busybox echo -ne '\x0181c46036\x7f'; /bin/busybox printf '\00281c46036\177'; /bin/echo -ne '\x0381c46036\x7f'; /usr/bin/printf '\00481c46036\177'; 
 ```
 <br>
 
