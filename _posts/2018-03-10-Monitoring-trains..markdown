@@ -11,19 +11,18 @@ in the public train system and never miss a train.<br><br>
 ![](https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/grafana-dash.png)
 
 
- ## Master Plan:
+## Master Plan:
 1) Scrape all data available (Train departure/arrival,delays,stations....)
 2) Standardize the format so i can implement pluggable systems (Grafana, Telegram Bot, Website, Twitter..)
 3) At least have fun when i hear "We are sorry for the inconvenience" while i check my systems
 <br><br>
----
+
 
 ### Scraping all the relevant datasets<br>
 All the data is collected with a script every 30 minutes using as input the site APIs and station lists, the ouput will be saved into InfluxDB (Legit, delay time tracking with timeseries DBs) 
 and a local folder for historical data that i will use later with git.<br>
 <br>
 
----
 
 ### Standardize format <br>
 To allow multiple systems comunicate together you always need to take raw data (train datasets) and standardize it into a more pluggable format:
@@ -31,7 +30,6 @@ To allow multiple systems comunicate together you always need to take raw data (
 - Git+Local (Pros: Efficent historical data tracking and easy full-text search...  Cons: None)
 <br>
 
----
 
 ### Developing "Pluggable" systems:<br>
 - The Grafana Dashboard gathers all the relevant metrics that i cherry picked from InfluxDB (Train departure/arrival, delay, last station detected, train number, timestamp).
