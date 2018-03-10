@@ -35,15 +35,15 @@ To allow multiple systems comunicate together you always need to take raw data (
 - The Grafana Dashboard gathers all the relevant metrics that i cherry picked from InfluxDB (Train departure/arrival, delay, last station detected, train number, timestamp).
 With this datasets i could easily create a dashboard that can really give you all the information that you can see on station information display sistems.
 <br><br> ![](https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/delays-dash.png) <br>
-- The telegram bot [](https://t.me/Trenordalerts_bot) is written in Go and with under 300 lines of code is it possible to read all the collected data of delays and comunicate them to the user.
+- The telegram bot [https://t.me/Trenordalerts_bot](https://t.me/Trenordalerts_bot) is written in Go and with under 300 lines of code is it possible to read all the collected data of delays and comunicate them to the user.
 The alerting part of the bot is more complex than the "Give me info of xyz train" because i need to identify the user before sending an alert (obvious.. i don't want to recieve alerts of my friend's train) so i implemented 
 a connector with a relational DB where i track chat_ids and alerts. <br>
-- Static Website [](https://trenistats.it/) <br>
+- Static Website [https://trenistats.it](https://trenistats.it/) <br>
 This is where the magic happens [](https://d3js.org/), the flow of the data is very simple now and i just need to gather data from one of my inputs (InfluxDB,Git or Local Dir) and show some graphs.
 How?
 The html code is automatically generated via a running script that collects the data from the local repo and generates the index.html for the static site.
 Even if i'm not a frontend specialist i managed to make something cool out of it (pure google fu skills and design 101)
-- Twitter bot [](https://twitter.com/trenistats) <br>
+- Twitter bot [https://twitter.com/trenistats](https://twitter.com/trenistats) <br>
 The bot gathers information from the local repo and triggers alerts via Twitter APIs if trains start/have long delays and tagging the main italian company that's responsible for the transportation system.
 Like the Telegram bot this is written in Go with very few lines, basicaly take what i have already did for Telegram + Twitter API integration.
 <br><br>
