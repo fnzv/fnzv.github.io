@@ -12,9 +12,9 @@ in the public train system and never miss a train.<br><br>
 
 <br><br> 
 ## Master Plan:
-1) Scrape all data available (Train departure/arrival,delays,stations....)
-2) Standardize the format so i can implement pluggable systems (Grafana, Telegram Bot, Website, Twitter..)
-3) At least have fun when i hear "We are sorry for the inconvenience" while i check my systems
+1) Scrape all data available (Train departure/arrival,delays,stations....) <br>
+2) Standardize the format so i can implement pluggable systems (Grafana, Telegram Bot, Website, Twitter..)<br>
+3) At least have fun when i hear "We are sorry for the inconvenience" while i check my systems<br>
 <br><br>
 
 
