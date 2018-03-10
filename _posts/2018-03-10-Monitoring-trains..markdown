@@ -48,7 +48,7 @@ The bot gathers information from the local repo and triggers alerts via Twitter 
 Like the Telegram bot this is written in Go with very few lines, basicaly take what i have already did for Telegram + Twitter API integration.
 <br><br>
 
-That's it, i could have gone more far into dashboarding and alerting but this setup seems to work fine for me. <br>
+That's it, i could have gone far into dashboarding and alerting but this setup seems to work fine for me. <br>
 I tried integrating Elasticsearch + Kibana for more fun stuff but Influx + Grafana did the job very well (it just works.. and no json decoding fights). <br>
 
 <p align="center">
