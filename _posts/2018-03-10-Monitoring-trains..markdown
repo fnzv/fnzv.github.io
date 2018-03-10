@@ -10,7 +10,7 @@ in the public train system and never miss a train.<br><br>
 
 ![](https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/grafana-dash.png)
 
-<br><br> 
+<br><br><br> 
 ## Master Plan:
 1) Scrape all data available (Train departure/arrival,delays,stations....) <br>
 2) Standardize the format so i can implement pluggable systems (Grafana, Telegram Bot, Website, Twitter..)<br>
@@ -21,14 +21,14 @@ in the public train system and never miss a train.<br><br>
 ## Scraping all the relevant datasets<br>
 All the data is collected with a script every 30 minutes using as input the site APIs and station lists, the ouput will be saved into InfluxDB (Legit, delay time tracking with timeseries DBs) 
 and a local folder for historical data that i will use later with git.<br>
-<br>
+<br><br> 
 
 
 ## Standardize format <br>
 To allow multiple systems comunicate together you always need to take raw data (train datasets) and standardize it into a more pluggable format:
 - InfluxDB  (Pros: A lot of client support, Grafana, Alerts, SQL...  Cons: Some more resources usage)
 - Git+Local (Pros: Efficent historical data tracking and easy full-text search...  Cons: None)
-<br>
+<br><br> 
 
 
 ## Developing "Pluggable" systems:<br>
