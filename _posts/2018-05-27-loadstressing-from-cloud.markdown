@@ -8,6 +8,7 @@ layout: post
 Today i finally decided to opensource some of my code created to reach my maximum level of lazyness, Automatically loadstressing web infrastructures via Telegram. <br>
 The other challenge was to see/prove if Golang can be a replacement/alternative for Python scripting.<br><br>
 
+Repo link: <a href='https://github.com/fnzv/DTBOT'>https://github.com/fnzv/DTBOT</a>
 
 Here is the diagram to better explain what i wanted to do:
 
@@ -15,11 +16,11 @@ Here is the diagram to better explain what i wanted to do:
 <br>
 *Disclaimer before i even start* <br>
 I'm not responsible for anything you do with this tool, this was made only for legit web loadstressing/benchmarking YOUR OWN infra. <br>
-I know that most of the code can be written more efficently/well, don't hate on my exec_shell() ahah
+I know that most of the code can be written more efficently/well, don't hate on my exec_shell() ahah  <br>
 *end of disclamer* <br>
 
 <br><br><br> 
-### The main "ingredients" are:
+## The main "ingredients" are:
 - Ansible <br>
 - Golang <br>
 - Telegram <br>
@@ -33,11 +34,11 @@ to the user via Telegram. <br>
 
 This is a classic example for load stressing from Openstack using DTBOT: <br>
 1) User writes to Loadstresser bot chat "/create 5" which triggers the bot to execute the underlying Ansible playbook to deploy 5 VMs on the Openstack Configured Credendials. <br>
-If you check the logs (/var/log/dtbot.log) with a small Ansible background you can understand what's really happening:
-2018/05/19 14:35:46 Command: source /etc/dtbot/os_creds && ansible_python_interpreter=/usr/bin/python3 ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -vv /etc/dtbot/playbooks/create-infra.yaml --extra-vars="total_nodes=5 telegramtoken=botTOKEN telegramchatid=CHATID"
+If you check the logs (/var/log/dtbot.log) with a small Ansible background you can understand what's really happening:  <br>
+```2018/05/19 14:35:46 Command: source /etc/dtbot/os_creds && ansible_python_interpreter=/usr/bin/python3 ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -vv /etc/dtbot/playbooks/create-infra.yaml --extra-vars="total_nodes=5 telegramtoken=botTOKEN telegramchatid=CHATID"```
 
 
-2) After a few minutes User recieves feedback that VMs are ready and can start loadstressing with: /load http://example.org <Num clients> <Num VMs involved> <Time in seconds>  <br>
+2) After a few minutes User recieves feedback that VMs are ready and can start loadstressing with: ```/load http://example.org <Num clients> <Num VMs involved> <Time in seconds> ```  <br>
 
 The defined command /load was created for simplicity and uses WRK (https://github.com/wg/wrk) as a stresser which works great out of the box without complex configuration files. <br>
 
@@ -61,7 +62,7 @@ If you reached that point and you still asking what DT stands for.. well it's ju
 
 
 <br><br>
-### Brief How To/Usage (more info on github repo):
+## Brief How To/Usage (more info on github repo):
 <br>
 1) Create a bot and save the bot Token, you can do it by writing "/newbot" to BotFather (https://telegram.me/botfather)
 <br>
