@@ -29,7 +29,7 @@ I know that most of the code can be written more efficently/well, don't hate on 
 
 
 
-It all starts from the Telegram Bot that keeps listening commands from the allowed "chat_id" configured and whenever a predefined command is sent the bot (Written in Golang) runs the predefined Ansible playbook with extra args and gives feedback
+It all starts from the Telegram Bot that keeps listening commands from the allowed "chat_id" configured and whenever a predefined command is sent the bot (Written in Golang) runs the Ansible playbook with extra args and gives feedback
 to the user via Telegram. <br>
 
 This is a classic example for load stressing from Openstack using DTBOT: <br>
