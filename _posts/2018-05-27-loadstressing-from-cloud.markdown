@@ -67,9 +67,9 @@ If you reached that point and you still asking what DT stands for.. well it's ju
 <br>
 2) Use the Quick-Install of dtbot on a Ubuntu 16.04 machine and configure it.<br>
    Required configuration files are: <br>
-   - ```/etc/dtbot/dtbot.conf``` ( Chat ID and Telegram Token, to find what chat id you have just write some messages to your bot and then open from the browser this url: https://api.telegram.org/bot<token>/getUpdates )
-   - ```/etc/dtbot/os_creds``` (if you want to create VMs on the Openstack Provider) - Openstack credential source file
-   - ```/etc/dtbot/aws_creds``` (if you want to create VMs on AWS) - AWS ACCESS and SECRET key source file (you just need the exports for those enviroment variables)
+   - /etc/dtbot/dtbot.conf ( Chat ID and Telegram Token, to find what chat id you have just write some messages to your bot and then open from the browser this url: https://api.telegram.org/bot<token>/getUpdates ) <br>
+   - /etc/dtbot/os_creds (if you want to create VMs on the Openstack Provider) - Openstack credential source file <br>
+   - /etc/dtbot/aws_creds` (if you want to create VMs on AWS) - AWS ACCESS and SECRET key source file (you just need the exports for those enviroment variables) <br>
 3) (re)start dtbot via systemd: service dtbot restart <br>
    If everything is fine you should see "Authorized on account BOT_NAME" on /var/log/dtbot <br>
    
