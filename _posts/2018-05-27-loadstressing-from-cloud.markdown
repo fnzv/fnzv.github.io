@@ -19,7 +19,7 @@ I know that most of the code can be written more efficently/well, don't hate on 
 *end of disclamer* <br>
 
 <br><br><br> 
-## The main "ingredients" are:
+### The main "ingredients" are:
 - Ansible <br>
 - Golang <br>
 - Telegram <br>
@@ -42,7 +42,7 @@ If you check the logs (/var/log/dtbot.log) with a small Ansible background you c
 The defined command /load was created for simplicity and uses WRK (https://github.com/wg/wrk) as a stresser which works great out of the box without complex configuration files. <br>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/dtbot-telegram.jpg?raw=true" alt="Sublime's custom image"/>
+  <img src="https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/dtbot-telegram.jpg?raw=true" width="260" height="500" alt="Sublime's custom image"/>
 </p>
 
 
@@ -61,22 +61,22 @@ If you reached that point and you still asking what DT stands for.. well it's ju
 
 
 <br><br>
-## Brief How To/Usage (more info on github repo):
+### Brief How To/Usage (more info on github repo):
 <br>
 1) Create a bot and save the bot Token, you can do it by writing "/newbot" to BotFather (https://telegram.me/botfather)
 <br>
 2) Use the Quick-Install of dtbot on a Ubuntu 16.04 machine and configure it.<br>
-   Required configuration files are: <br>
-   - /etc/dtbot/dtbot.conf ( Chat ID and Telegram Token, to find what chat id you have just write some messages to your bot and then open from the browser this url: https://api.telegram.org/bot<token>/getUpdates ) <br>
-   - /etc/dtbot/os_creds (if you want to create VMs on the Openstack Provider) - Openstack credential source file <br>
-   - /etc/dtbot/aws_creds` (if you want to create VMs on AWS) - AWS ACCESS and SECRET key source file (you just need the exports for those enviroment variables) <br>
+   Required configuration files are located under ```/etc/dtbot/``` : <br>
+   - dtbot.conf ( Chat ID and Telegram Token, to find what chat id you have just write some messages to your bot and then open from the browser this url: https://api.telegram.org/bot<token>/getUpdates ) <br>
+   - os_creds (if you want to create VMs on the Openstack Provider) - Openstack credential source file <br>
+   - aws_creds` (if you want to create VMs on AWS) - AWS ACCESS and SECRET key source file (you just need the exports for those enviroment variables) <br>
 3) (re)start dtbot via systemd: service dtbot restart <br>
    If everything is fine you should see "Authorized on account BOT_NAME" on /var/log/dtbot <br>
    
 3.5) Take some time to adjust the Ansible Playbooks based on your cloud enviroment (AWS or Openstack): <br>
- - ```/etc/dtbot/playbooks/aws-create-infra.yaml``` - You can keep it as-is but you need to change the "key_name:" with one present in your account, this VM should be able to SSH into newly created AWS instances with this key so generate a new key on the machine and add it to AWS)
- - ```/etc/dtbot/playbooks/create-infra.yaml``` - The only part that needs to be changes is the "flavor:" and "image:" name wich changes based on the Openstack provider
- - Other changes that might be done are always the same but on also the other playbooks: info.yaml,ddos.yaml (Openstack flavor,image)
+ - ```/etc/dtbot/playbooks/aws-create-infra.yaml``` - You can keep it as-is but you need to change the "key_name:" with one present in your account, this VM should be able to SSH into newly created AWS instances with this key so generate a new key on the machine and add it to AWS) <br>
+ - ```/etc/dtbot/playbooks/create-infra.yaml``` - The only part that needs to be changes is the "flavor:" and "image:" name wich changes based on the Openstack provider <br>
+ - Other changes that might be done are always the same but on also the other playbooks: info.yaml,ddos.yaml (Openstack flavor,image) <br>
 
 <br>
 4) Try to send some commands to your Telegram Bot: <br>
@@ -97,7 +97,7 @@ If you reached that point and you still asking what DT stands for.. well it's ju
    /info N - Gathers info on N VMs on Openstack (Established connections and ifconfig stats), useful to check current stresstest status. (Example: start /load then after all the VMs started check /info N to see stats/data)
    ```
    
- 5) Start loadstressing and tune your infra cache,db & webserver... repeat :)
+ 5) Start loadstressing and tune your infra cache,db & webserver... repeat :) <br><br>
     ![](https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/dtbot-requests.png)
 
    
