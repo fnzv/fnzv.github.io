@@ -64,7 +64,7 @@ If you reached that point and you still asking what DT stands for.. well it's ju
 <br><br>
 ## Brief How To/Usage (more info on github repo):
 <br>
-1) Create a bot and save the bot Token, you can do it by writing "/newbot" to BotFather (https://telegram.me/botfather)
+1) Create a bot and save the bot Token, you can do it by writing "/newbot" to BotFather (<a href="https://telegram.me/botfather">https://telegram.me/botfather</a>)
 <br>
 2) Use the Quick-Install of dtbot on a Ubuntu 16.04 machine and configure it.<br>
    Required configuration files are located under ```/etc/dtbot/``` : <br>
