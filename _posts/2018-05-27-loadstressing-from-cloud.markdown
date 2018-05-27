@@ -8,7 +8,7 @@ layout: post
 Today i finally decided to opensource some of my code created to reach my maximum level of lazyness, Automatically loadstressing web infrastructures via Telegram. <br>
 The other challenge was to see/prove if Golang can be a replacement/alternative for Python scripting.<br><br>
 
-Repo link: <a href='https://github.com/fnzv/DTBOT'>https://github.com/fnzv/DTBOT</a>
+Repo: <a href='https://github.com/fnzv/DTBOT'>https://github.com/fnzv/DTBOT</a>
 
 Here is the diagram to better explain what i wanted to do:
 
