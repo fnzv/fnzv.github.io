@@ -33,6 +33,16 @@
   Cache-Control: public, max-age=31536000, immutable
 /sw.js
   Cache-Control: no-cache
+/tag/failover
+  Link: </webpack-runtime-6e7cace43298b26889be.js>; rel=preload; as=script
+  Link: </framework-da8c6e3ed6a1d0c32925.js>; rel=preload; as=script
+  Link: </app-e90e17c4b1b07e19c821.js>; rel=preload; as=script
+  Link: </styles-f12963b3798c232a68f6.js>; rel=preload; as=script
+  Link: </commons-0598149a8ee2d48e0318.js>; rel=preload; as=script
+  Link: </2a8b21a726623947d7ecc6e11899284bc6c5f3b1-7eecc7203c60de31b1a9.js>; rel=preload; as=script
+  Link: </component---src-templates-tags-jsx-b1114713c2b68495a1e3.js>; rel=preload; as=script
+  Link: </page-data/app-data.json>; rel=preload; as=fetch; crossorigin
+  Link: </page-data/tag/failover/page-data.json>; rel=preload; as=fetch; crossorigin
 /tag/ddos
   Link: </webpack-runtime-6e7cace43298b26889be.js>; rel=preload; as=script
   Link: </framework-da8c6e3ed6a1d0c32925.js>; rel=preload; as=script
@@ -103,6 +113,15 @@
   Link: </component---src-templates-tags-jsx-b1114713c2b68495a1e3.js>; rel=preload; as=script
   Link: </page-data/app-data.json>; rel=preload; as=fetch; crossorigin
   Link: </page-data/tag/stuff/page/2/page-data.json>; rel=preload; as=fetch; crossorigin
+/blog/2020-05-30-automatic-failover-interlock
+  Link: </webpack-runtime-6e7cace43298b26889be.js>; rel=preload; as=script
+  Link: </framework-da8c6e3ed6a1d0c32925.js>; rel=preload; as=script
+  Link: </app-e90e17c4b1b07e19c821.js>; rel=preload; as=script
+  Link: </styles-f12963b3798c232a68f6.js>; rel=preload; as=script
+  Link: </commons-0598149a8ee2d48e0318.js>; rel=preload; as=script
+  Link: </component---src-templates-blog-post-jsx-5c5a5017b795116bffbb.js>; rel=preload; as=script
+  Link: </page-data/app-data.json>; rel=preload; as=fetch; crossorigin
+  Link: </page-data/blog/2020-05-30-automatic-failover-interlock/page-data.json>; rel=preload; as=fetch; crossorigin
 /blog/2018-05-27-loadstressing-from-cloud
   Link: </webpack-runtime-6e7cace43298b26889be.js>; rel=preload; as=script
   Link: </framework-da8c6e3ed6a1d0c32925.js>; rel=preload; as=script

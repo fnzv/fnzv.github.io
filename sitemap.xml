@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+<url> <loc>https://sami.pw/tag/failover</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://sami.pw/tag/ddos</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://sami.pw/tag/trains</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://sami.pw/tag/honeypot</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
@@ -7,6 +8,7 @@
 <url> <loc>https://sami.pw/tag/blockchain</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://sami.pw/tag/stuff</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://sami.pw/tag/stuff/page/2</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
+<url> <loc>https://sami.pw/blog/2020-05-30-automatic-failover-interlock</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://sami.pw/blog/2018-05-27-loadstressing-from-cloud</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://sami.pw/blog/2018-03-10-Monitoring-trains</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>
 <url> <loc>https://sami.pw/blog/2017-12-31-Some-fun-stats-running-telnet</loc> <changefreq>daily</changefreq> <priority>0.7</priority> </url>

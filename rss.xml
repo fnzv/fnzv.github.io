@@ -1,4 +1,98 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[sami.pw]]></title><description><![CDATA[a new blog site]]></description><link>http://github.com/dylang/node-rss</link><generator>GatsbyJS</generator><lastBuildDate>Sat, 23 May 2020 01:18:38 GMT</lastBuildDate><item><title><![CDATA[Loadstressing from the cloud with DTBOT]]></title><description><![CDATA[<p>Today i finally decided to opensource some of my code created to reach my maximum level of lazyness, Automatically loadstressing web infrastructures via Telegram. <br>
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[sami.pw]]></title><description><![CDATA[a new blog site]]></description><link>http://github.com/dylang/node-rss</link><generator>GatsbyJS</generator><lastBuildDate>Sat, 30 May 2020 12:24:54 GMT</lastBuildDate><item><title><![CDATA[Automatic failover using Interlock + CI/CD(s)]]></title><description><![CDATA[<h3>Automatic failover using Interlock and CI/CDs</h3>
+<p>In the last few weeks in the middle of the lockdown i was bored and i (re)started playing around <strong>Go</strong> since i was a bit rusty. <br>
+My main goal was to <strong>automagically</strong> failover all my static sites from Github &#x26; other public hosting sites back and forth in order to maintain an active DR plan when one of my providers is going offline because of connectivity or any other outage/maintenance.</p>
+<p> So before going into the blog post here is a quick overview: <br> <br> <br></p>
+<p><img src="https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/interlock-scheme.png"> <br></p>
+<p>When i started writing the code this time i tried to force myself to avoid the <strong>bad and ugly "exec shell"</strong> in order to be able to create a more thin Golang docker image (260MiB)</p>
+<p>So to avoid making you read all the README.md i could sum up all the code in this sentence:</p>
+<div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">&quot;Interlock is a DNS failover and management tool based on Cloudflare APIs&quot;</code></pre></div>
+<p>Maybe i reinvented the wheel because i could have used (paid) the built-in healthcheck of CF or any other DNS provider but i wanted to learn and research
+underneath in order to get my hands "dirty" and mess around Go again</p>
+<p>This piece of code is supposed to run also inside your k8s cluster in order to gather metrics versus your ingresses and monitor internal
+latency between your cluster nodes, all the metrics are gathered and sent directly to the configured InfluxDB host</p>
+<p>Here you can see an example visualization made in a few minutes to monitor some of my public static sites latency</p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/interlock-grafana.png?raw=true" width="1100" height="250">
+</p>
+<p>This data could be used to generate post-hook events in order to run external bash scripts via <a href="https://github.com/adnanh/webhook">https://github.com/adnanh/webhook</a> (kudos to the dev) + grafana webhooks from Alerts</p>
+<h3>Cool but how can i use it right now?</h3>
+<p>Well this is up to you depending on the use case, to run a interlock generic example with a "famous" Public CI/CD you can follow these instructions: </p>
+<ol>
+<li>Clone the Git repo or import directly from your <strong>Gitlab</strong> account
+<br><br></li>
+<li>Setup your ENV variables (masked) under Settings -> CI/CD -> Variables (Expand) <br>
+<strong>Keep the dry run env variables</strong> in order to avoid any changes to your CF account <br>
+Telegram and InfluxDB variables can be kept empty<br>
+Just in case keep your repo privacy settings to <strong>private</strong>
+<br><br></li>
+<li>Change your configuration under interlock.conf  <br>
+Set your origins <br>
+Commit those changes with the commit message "build" in order to prepare your Docker image
+<br><br></li>
+<li>Go under CI/CD -> Pipelines and try to run the already configured one by pressing "Run pipeline" <br>
+If everything is set up properly you will see all green
+<br><br> </li>
+<li>Schedule your pipeline in order to run multiple times using crontab syntax <strong>(if you don't speak crontabese</strong> you can go <a href="https://crontab.guru/">https://crontab.guru/</a>), for example */15 * * * *  <br>
+To run only one stage of the pipeline you must set the ENV variable CRON to TRUE</li>
+</ol>
+<p>Leaving you with this CI/CD meme here, if you have any question or suggestions you can contact me or open a pull request</p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/cicd-meme.jpg?raw=true" width="290" height="300">
+</p>
+<p>Links and Resources:<br></p>
+<ul>
+<li><a href="https://docs.gitlab.com/ee/ci/pipelines/schedules.html">Gitlab CI/CD documentation</a><br></li>
+<li><a href="https://github.com/cloudflare/cloudflare-go">Cloudflare-go library</a>  <br></li>
+</ul>
+<p>wq!<br>
+CTRL+R(reverse-i-search)`add': git add . &#x26;&#x26; git commit -m "Initial Commit" &#x26;&#x26; git push origin master </p>]]></description><link>https://sami.pw/blog/2020-05-30-automatic-failover-interlock</link><guid isPermaLink="false">https://sami.pw/blog/2020-05-30-automatic-failover-interlock</guid><pubDate>Sat, 30 May 2020 00:00:00 GMT</pubDate><content:encoded>&lt;h3&gt;Automatic failover using Interlock and CI/CDs&lt;/h3&gt;
+&lt;p&gt;In the last few weeks in the middle of the lockdown i was bored and i (re)started playing around &lt;strong&gt;Go&lt;/strong&gt; since i was a bit rusty. &lt;br&gt;
+My main goal was to &lt;strong&gt;automagically&lt;/strong&gt; failover all my static sites from Github &amp;#x26; other public hosting sites back and forth in order to maintain an active DR plan when one of my providers is going offline because of connectivity or any other outage/maintenance.&lt;/p&gt;
+&lt;p&gt; So before going into the blog post here is a quick overview: &lt;br&gt; &lt;br&gt; &lt;br&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/interlock-scheme.png&quot;&gt; &lt;br&gt;&lt;/p&gt;
+&lt;p&gt;When i started writing the code this time i tried to force myself to avoid the &lt;strong&gt;bad and ugly &quot;exec shell&quot;&lt;/strong&gt; in order to be able to create a more thin Golang docker image (260MiB)&lt;/p&gt;
+&lt;p&gt;So to avoid making you read all the README.md i could sum up all the code in this sentence:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;&amp;quot;Interlock is a DNS failover and management tool based on Cloudflare APIs&amp;quot;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Maybe i reinvented the wheel because i could have used (paid) the built-in healthcheck of CF or any other DNS provider but i wanted to learn and research
+underneath in order to get my hands &quot;dirty&quot; and mess around Go again&lt;/p&gt;
+&lt;p&gt;This piece of code is supposed to run also inside your k8s cluster in order to gather metrics versus your ingresses and monitor internal
+latency between your cluster nodes, all the metrics are gathered and sent directly to the configured InfluxDB host&lt;/p&gt;
+&lt;p&gt;Here you can see an example visualization made in a few minutes to monitor some of my public static sites latency&lt;/p&gt;
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/interlock-grafana.png?raw=true&quot; width=&quot;1100&quot; height=&quot;250&quot;&gt;
+&lt;/p&gt;
+&lt;p&gt;This data could be used to generate post-hook events in order to run external bash scripts via &lt;a href=&quot;https://github.com/adnanh/webhook&quot;&gt;https://github.com/adnanh/webhook&lt;/a&gt; (kudos to the dev) + grafana webhooks from Alerts&lt;/p&gt;
+&lt;h3&gt;Cool but how can i use it right now?&lt;/h3&gt;
+&lt;p&gt;Well this is up to you depending on the use case, to run a interlock generic example with a &quot;famous&quot; Public CI/CD you can follow these instructions: &lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Clone the Git repo or import directly from your &lt;strong&gt;Gitlab&lt;/strong&gt; account
+&lt;br&gt;&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Setup your ENV variables (masked) under Settings -&gt; CI/CD -&gt; Variables (Expand) &lt;br&gt;
+&lt;strong&gt;Keep the dry run env variables&lt;/strong&gt; in order to avoid any changes to your CF account &lt;br&gt;
+Telegram and InfluxDB variables can be kept empty&lt;br&gt;
+Just in case keep your repo privacy settings to &lt;strong&gt;private&lt;/strong&gt;
+&lt;br&gt;&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Change your configuration under interlock.conf  &lt;br&gt;
+Set your origins &lt;br&gt;
+Commit those changes with the commit message &quot;build&quot; in order to prepare your Docker image
+&lt;br&gt;&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Go under CI/CD -&gt; Pipelines and try to run the already configured one by pressing &quot;Run pipeline&quot; &lt;br&gt;
+If everything is set up properly you will see all green
+&lt;br&gt;&lt;br&gt; &lt;/li&gt;
+&lt;li&gt;Schedule your pipeline in order to run multiple times using crontab syntax &lt;strong&gt;(if you don&apos;t speak crontabese&lt;/strong&gt; you can go &lt;a href=&quot;https://crontab.guru/&quot;&gt;https://crontab.guru/&lt;/a&gt;), for example */15 * * * *  &lt;br&gt;
+To run only one stage of the pipeline you must set the ENV variable CRON to TRUE&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Leaving you with this CI/CD meme here, if you have any question or suggestions you can contact me or open a pull request&lt;/p&gt;
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/cicd-meme.jpg?raw=true&quot; width=&quot;290&quot; height=&quot;300&quot;&gt;
+&lt;/p&gt;
+&lt;p&gt;Links and Resources:&lt;br&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://docs.gitlab.com/ee/ci/pipelines/schedules.html&quot;&gt;Gitlab CI/CD documentation&lt;/a&gt;&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/cloudflare/cloudflare-go&quot;&gt;Cloudflare-go library&lt;/a&gt;  &lt;br&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;wq!&lt;br&gt;
+CTRL+R(reverse-i-search)`add&apos;: git add . &amp;#x26;&amp;#x26; git commit -m &quot;Initial Commit&quot; &amp;#x26;&amp;#x26; git push origin master &lt;/p&gt;</content:encoded></item><item><title><![CDATA[Loadstressing from the cloud with DTBOT]]></title><description><![CDATA[<p>Today i finally decided to opensource some of my code created to reach my maximum level of lazyness, Automatically loadstressing web infrastructures via Telegram. <br>
 The other challenge was to see/prove if Golang can be a replacement/alternative for Python scripting.<br><br></p>
 <p>Repo: <a href='https://github.com/fnzv/DTBOT'>https://github.com/fnzv/DTBOT</a></p>
 <p>Here is the diagram to better explain what i wanted to do:</p>
