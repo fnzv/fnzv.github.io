@@ -1,8 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[sami.pw]]></title><description><![CDATA[a new blog site]]></description><link>http://github.com/dylang/node-rss</link><generator>GatsbyJS</generator><lastBuildDate>Sat, 30 May 2020 12:24:54 GMT</lastBuildDate><item><title><![CDATA[Automatic failover using Interlock + CI/CD(s)]]></title><description><![CDATA[<h3>Automatic failover using Interlock and CI/CDs</h3>
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[sami.pw]]></title><description><![CDATA[a new blog site]]></description><link>http://github.com/dylang/node-rss</link><generator>GatsbyJS</generator><lastBuildDate>Sat, 30 May 2020 12:42:44 GMT</lastBuildDate><item><title><![CDATA[Automatic failover using Interlock + CI/CD(s)]]></title><description><![CDATA[<h3>Automatic failover using Interlock and CI/CDs</h3>
 <p>In the last few weeks in the middle of the lockdown i was bored and i (re)started playing around <strong>Go</strong> since i was a bit rusty. <br>
 My main goal was to <strong>automagically</strong> failover all my static sites from Github &#x26; other public hosting sites back and forth in order to maintain an active DR plan when one of my providers is going offline because of connectivity or any other outage/maintenance.</p>
 <p> So before going into the blog post here is a quick overview: <br> <br> <br></p>
 <p><img src="https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/interlock-scheme.png"> <br></p>
+<p>You can check it also on the readme there: <a href="https://github.com/fnzv/interlock">https://github.com/fnzv/interlock</a></p>
 <p>When i started writing the code this time i tried to force myself to avoid the <strong>bad and ugly "exec shell"</strong> in order to be able to create a more thin Golang docker image (260MiB)</p>
 <p>So to avoid making you read all the README.md i could sum up all the code in this sentence:</p>
 <div class="gatsby-highlight" data-language="text"><pre class="language-text"><code class="language-text">&quot;Interlock is a DNS failover and management tool based on Cloudflare APIs&quot;</code></pre></div>
@@ -43,6 +44,7 @@ To run only one stage of the pipeline you must set the ENV variable CRON to TRUE
 <ul>
 <li><a href="https://docs.gitlab.com/ee/ci/pipelines/schedules.html">Gitlab CI/CD documentation</a><br></li>
 <li><a href="https://github.com/cloudflare/cloudflare-go">Cloudflare-go library</a>  <br></li>
+<li>[Git repo] (<a href="https://github.com/fnzv/interlock">https://github.com/fnzv/interlock</a>) <br></li>
 </ul>
 <p>wq!<br>
 CTRL+R(reverse-i-search)`add': git add . &#x26;&#x26; git commit -m "Initial Commit" &#x26;&#x26; git push origin master </p>]]></description><link>https://sami.pw/blog/2020-05-30-automatic-failover-interlock</link><guid isPermaLink="false">https://sami.pw/blog/2020-05-30-automatic-failover-interlock</guid><pubDate>Sat, 30 May 2020 00:00:00 GMT</pubDate><content:encoded>&lt;h3&gt;Automatic failover using Interlock and CI/CDs&lt;/h3&gt;
@@ -50,6 +52,7 @@ CTRL+R(reverse-i-search)`add': git add . &#x26;&#x26; git commit -m "Initial Com
 My main goal was to &lt;strong&gt;automagically&lt;/strong&gt; failover all my static sites from Github &amp;#x26; other public hosting sites back and forth in order to maintain an active DR plan when one of my providers is going offline because of connectivity or any other outage/maintenance.&lt;/p&gt;
 &lt;p&gt; So before going into the blog post here is a quick overview: &lt;br&gt; &lt;br&gt; &lt;br&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/fnzv/fnzv.github.io/master/imgs/interlock-scheme.png&quot;&gt; &lt;br&gt;&lt;/p&gt;
+&lt;p&gt;You can check it also on the readme there: &lt;a href=&quot;https://github.com/fnzv/interlock&quot;&gt;https://github.com/fnzv/interlock&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;When i started writing the code this time i tried to force myself to avoid the &lt;strong&gt;bad and ugly &quot;exec shell&quot;&lt;/strong&gt; in order to be able to create a more thin Golang docker image (260MiB)&lt;/p&gt;
 &lt;p&gt;So to avoid making you read all the README.md i could sum up all the code in this sentence:&lt;/p&gt;
 &lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;&amp;quot;Interlock is a DNS failover and management tool based on Cloudflare APIs&amp;quot;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
@@ -90,6 +93,7 @@ To run only one stage of the pipeline you must set the ENV variable CRON to TRUE
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&quot;https://docs.gitlab.com/ee/ci/pipelines/schedules.html&quot;&gt;Gitlab CI/CD documentation&lt;/a&gt;&lt;br&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;https://github.com/cloudflare/cloudflare-go&quot;&gt;Cloudflare-go library&lt;/a&gt;  &lt;br&gt;&lt;/li&gt;
+&lt;li&gt;[Git repo] (&lt;a href=&quot;https://github.com/fnzv/interlock&quot;&gt;https://github.com/fnzv/interlock&lt;/a&gt;) &lt;br&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;wq!&lt;br&gt;
 CTRL+R(reverse-i-search)`add&apos;: git add . &amp;#x26;&amp;#x26; git commit -m &quot;Initial Commit&quot; &amp;#x26;&amp;#x26; git push origin master &lt;/p&gt;</content:encoded></item><item><title><![CDATA[Loadstressing from the cloud with DTBOT]]></title><description><![CDATA[<p>Today i finally decided to opensource some of my code created to reach my maximum level of lazyness, Automatically loadstressing web infrastructures via Telegram. <br>
