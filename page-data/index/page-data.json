@@ -4,7 +4,7 @@
     {"data":
         {"allMarkdownRemark":
             {"edges":[
-                {"node":{"id":"b926c8dc-dbd6-5587-be22-de1f05489fef","frontmatter":
+                {"node":{"id":"b926c8dc-dbd6-5587-be22-de1f05489f5f","frontmatter":
                         {"title":"Testing Benford's Law on COVID-19 italian Datasets","date":"March 19, 2021","path":"/blog/2021-03-19-benford-law-checker","tags":"math"}}},
             {"node":{"id":"b926c8dc-dbd6-5587-be22-de1f05489f4f","frontmatter":
                     {"title":"Automatic failover using Interlock + CI/CD(s)","date":"May 30, 2020","path":"/blog/2020-05-30-automatic-failover-interlock","tags":"failover"}}},
